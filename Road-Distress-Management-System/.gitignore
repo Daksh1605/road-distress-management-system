@@ -1,0 +1,100 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+.pnp/
+.pnp.js
+
+# React build output
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.next/
+frontend/coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+backend/.env
+backend/.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+ENV/
+backend/.venv/
+backend/venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# FastAPI and server logs
+*.log
+logs/
+uvicorn*.log
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+postgres-data/
+pgdata/
+
+# Datasets and generated AI outputs
+ai/datasets/*
+!ai/datasets/.gitkeep
+ai/runs/
+ai/outputs/
+ai/predictions/
+ai/checkpoints/
+
+# YOLO and model files
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+*.weights
+*.h5
+*.keras
+*.ckpt
+
+# Videos and large media
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.flv
+*.wmv
+*.mpeg
+*.mpg
+
+# Images generated from large datasets
+*.tif
+*.tiff
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+docker-data/
+
