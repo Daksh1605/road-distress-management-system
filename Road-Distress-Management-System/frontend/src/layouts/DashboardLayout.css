@@ -1,0 +1,57 @@
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: #020617;
+  text-align: left;
+  overflow: hidden;
+}
+
+.dashboard-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  background: #020617;
+  overflow: hidden;
+}
+
+.dashboard-layout__content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar for Main Content Area */
+.dashboard-layout__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-layout__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-layout__content::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+}
+
+.dashboard-layout__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+@media (max-width: 768px) {
+  /* Offset main pane for overlay fixed sidebar on smaller screens */
+  .dashboard-layout__main {
+    padding-left: 70px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-layout__content {
+    padding: 1rem;
+  }
+}

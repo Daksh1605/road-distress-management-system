@@ -1,9 +1,5 @@
-function Dashboard() {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-    </div>
-  )
-}
+import DashboardGrid from "../../components/dashboard/DashboardGrid";
 
-export default Dashboard
+export default function Dashboard() {
+  return <DashboardGrid />;
+}
