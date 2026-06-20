@@ -32,6 +32,14 @@ def read_reports(
     return get_reports(db, skip=skip, limit=limit)
 
 
+@router.get("/generate")
+def generate_report() -> dict:
+    """
+    Placeholder endpoint to trigger and download a PDF/CSV/JSON system report.
+    """
+    return {"message": "Generate report stub"}
+
+
 @router.get("/{id}", response_model=ReportResponse)
 def read_report_by_id(id: int, db: Session = Depends(get_db)) -> ReportResponse:
     """

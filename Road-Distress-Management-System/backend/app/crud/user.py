@@ -3,6 +3,7 @@ CRUD operations for the User entity.
 """
 
 from typing import List, Optional
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
@@ -13,21 +14,21 @@ def get_user(db: Session, user_id: int) -> Optional[User]:
     """
     Retrieve a single user by ID.
     """
-    return db.query(User).filter(User.id == user_id).first()
+    return db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
 
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """
     Retrieve a single user by email address.
     """
-    return db.query(User).filter(User.email == email).first()
+    return db.execute(select(User).where(User.email == email)).scalar_one_or_none()
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     """
     Retrieve a list of users with pagination.
     """
-    return db.query(User).offset(skip).limit(limit).all()
+    return list(db.scalars(select(User).offset(skip).limit(limit)).all())
 
 
 def create_user(db: Session, user_in: UserCreate) -> User:
