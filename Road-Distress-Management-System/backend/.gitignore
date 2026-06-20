@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+
+# Virtual environment folders
+.venv
+env/
+venv/
+ENV/
+
+# Testing and caching
+.pytest_cache/
+.mypy_cache/
