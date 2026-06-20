@@ -34,16 +34,63 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import text, inspect
+from app.db.session import get_db, SessionLocal
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+def startup_event() -> None:
+    """
+    FastAPI startup hook to validate connection to PostgreSQL.
+    """
+    logger.info("Validating database connection on startup...")
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db.close()
+        logger.info("Database connection validated successfully.")
+    except Exception as e:
+        logger.critical(f"Database connection validation failed: {e}")
+
+
 @app.get("/health", tags=["Health"])
-def health_check() -> dict:
+def health_check(db: Session = Depends(get_db)) -> dict:
     """
-    Health check endpoint to verify that the API server is online and running.
+    Enhanced health check validating the database connection and verifying tables.
     """
-    return {
-        "status": "healthy",
-        "service": "road-distress-management-backend",
-        "version": "1.0.0"
-    }
+    try:
+        # Perform actual database connection validation
+        db.execute(text("SELECT 1"))
+        
+        # Verify table presence
+        inspector = inspect(db.bind)
+        tables = inspector.get_table_names()
+        
+        required_tables = ["users", "road_distresses", "uploaded_videos", "maintenance_tasks", "reports"]
+        for table in required_tables:
+            if table not in tables:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Database table verification failed. Missing table: {table}"
+                )
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "tables": required_tables
+        }
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database connection is unhealthy: {str(e)}"
+        )
 
 
 # Centralized router registry for API v1 routes
