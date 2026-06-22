@@ -1,5 +1,6 @@
 """
 Media upload and processing routes for the Road Distress Management System.
+Retained for legacy/backward compatibility (used by older tests and integrations).
 """
 
 from typing import List
@@ -16,26 +17,27 @@ from app.crud.video import (
 from app.schemas.video import (
     UploadedVideoCreate,
     UploadedVideoUpdate,
-    UploadedVideoResponse
+    LegacyUploadedVideoCreate,
+    LegacyUploadedVideoResponse
 )
 
 router = APIRouter()
 
 
-@router.get("/videos", response_model=List[UploadedVideoResponse])
+@router.get("/videos", response_model=List[LegacyUploadedVideoResponse])
 def read_videos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
-) -> List[UploadedVideoResponse]:
+) -> List[LegacyUploadedVideoResponse]:
     """
     Retrieve logs for all uploaded surveillance videos.
     """
     return get_videos(db, skip=skip, limit=limit)
 
 
-@router.get("/video/{id}", response_model=UploadedVideoResponse)
-def read_video_by_id(id: int, db: Session = Depends(get_db)) -> UploadedVideoResponse:
+@router.get("/video/{id}", response_model=LegacyUploadedVideoResponse)
+def read_video_by_id(id: int, db: Session = Depends(get_db)) -> LegacyUploadedVideoResponse:
     """
     Retrieve metadata of a single uploaded video log.
     """
@@ -48,25 +50,30 @@ def read_video_by_id(id: int, db: Session = Depends(get_db)) -> UploadedVideoRes
     return db_video
 
 
-@router.post("/video", response_model=UploadedVideoResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/video", response_model=LegacyUploadedVideoResponse, status_code=status.HTTP_201_CREATED)
 def upload_video_file(
-    video_in: UploadedVideoCreate,
+    video_in: LegacyUploadedVideoCreate,
     db: Session = Depends(get_db)
-) -> UploadedVideoResponse:
+) -> LegacyUploadedVideoResponse:
     """
-    Log the metadata of an uploaded road surveillance video.
+    Log the metadata of an uploaded road surveillance video (Legacy API endpoint).
     """
-    # In a real app, video file storage would be handled here (S3 / Local storage).
-    # We will log the video metadata and initial "pending" status in database.
-    return create_video(db, video_in=video_in)
+    # Map legacy schema format to current database metadata format
+    new_video_in = UploadedVideoCreate(
+        filename=video_in.file_name,
+        filepath=f"uploads/videos/{video_in.file_name}",
+        processing_status=video_in.processing_status,
+        uploader_id=video_in.uploaded_by
+    )
+    return create_video(db, video_in=new_video_in)
 
 
-@router.put("/video/{id}", response_model=UploadedVideoResponse)
+@router.put("/video/{id}", response_model=LegacyUploadedVideoResponse)
 def update_video_status(
     id: int,
     video_in: UploadedVideoUpdate,
     db: Session = Depends(get_db)
-) -> UploadedVideoResponse:
+) -> LegacyUploadedVideoResponse:
     """
     Update processing status of an uploaded video.
     """
@@ -79,8 +86,8 @@ def update_video_status(
     return db_video
 
 
-@router.delete("/video/{id}", response_model=UploadedVideoResponse)
-def delete_video_log(id: int, db: Session = Depends(get_db)) -> UploadedVideoResponse:
+@router.delete("/video/{id}", response_model=LegacyUploadedVideoResponse)
+def delete_video_log(id: int, db: Session = Depends(get_db)) -> LegacyUploadedVideoResponse:
     """
     Delete video upload metadata.
     """

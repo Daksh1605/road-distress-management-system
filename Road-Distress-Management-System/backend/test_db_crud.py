@@ -69,9 +69,10 @@ def test_database_crud() -> None:
         # 5. Create Uploaded Video (referenced to User)
         logger.info("Step 4: Creating uploaded video log (linked to user)...")
         test_video = UploadedVideo(
-            file_name="highway_scan_01.mp4",
+            filename="highway_scan_01.mp4",
+            filepath="uploads/videos/highway_scan_01.mp4",
             processing_status="completed",
-            uploaded_by=test_user.id
+            uploader_id=test_user.id
         )
         db.add(test_video)
         db.commit()

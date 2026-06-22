@@ -20,8 +20,9 @@ class UploadedVideo(Base):
     __tablename__ = "uploaded_videos"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    upload_time: Mapped[datetime] = mapped_column(
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    filepath: Mapped[str] = mapped_column(String(512), nullable=True)
+    upload_timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
         server_default=func.now(), 
         nullable=False
@@ -39,7 +40,7 @@ class UploadedVideo(Base):
     )
     processing_status: Mapped[str] = mapped_column(String(50), default="pending", nullable=False)
 
-    uploaded_by: Mapped[Optional[int]] = mapped_column(
+    uploader_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), 
         nullable=True
     )

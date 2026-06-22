@@ -13,7 +13,8 @@ from app.api.v1.routes import (
     reports,
     maintenance,
     upload,
-    users
+    users,
+    videos
 )
 
 # Initialize FastAPI application
@@ -105,6 +106,7 @@ api_router.include_router(gis.router, prefix="/gis", tags=["GIS Map Integration"
 api_router.include_router(reports.router, prefix="/reports", tags=["Reporting & Analytics"])
 api_router.include_router(maintenance.router, prefix="/maintenance", tags=["Maintenance Scheduling"])
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
+api_router.include_router(videos.router, prefix="/videos", tags=["Video Management"])
 api_router.include_router(upload.router, prefix="/upload", tags=["Media Upload & Processing"])
 
 # Bind centralized API version 1 router to application

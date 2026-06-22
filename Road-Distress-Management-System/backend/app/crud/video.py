@@ -1,5 +1,6 @@
 """
 CRUD operations for the UploadedVideo entity.
+Refactored to reference the updated model field names: filename, filepath, uploader_id.
 """
 
 from typing import List, Optional
@@ -27,9 +28,10 @@ def create_video(db: Session, video_in: UploadedVideoCreate) -> UploadedVideo:
     Create a new uploaded video record.
     """
     db_video = UploadedVideo(
-        file_name=video_in.file_name,
+        filename=video_in.filename,
+        filepath=video_in.filepath,
         processing_status=video_in.processing_status,
-        uploaded_by=video_in.uploaded_by,
+        uploader_id=video_in.uploader_id,
     )
     db.add(db_video)
     db.commit()
@@ -39,7 +41,7 @@ def create_video(db: Session, video_in: UploadedVideoCreate) -> UploadedVideo:
 
 def update_video(db: Session, video_id: int, video_in: UploadedVideoUpdate) -> Optional[UploadedVideo]:
     """
-    Update the status of an uploaded video record.
+    Update the status or metadata of an uploaded video record.
     """
     db_video = get_video(db, video_id)
     if not db_video:
