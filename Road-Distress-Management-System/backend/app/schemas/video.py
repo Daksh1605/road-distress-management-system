@@ -16,6 +16,9 @@ class UploadedVideoBase(BaseModel):
     filepath: Optional[str] = Field(None, max_length=512, description="Physical path of the video file on disk")
     processing_status: str = Field("pending", max_length=50, description="Status of video processing: pending, processing, completed, failed")
     uploader_id: Optional[int] = Field(None, description="ID of the user who uploaded the video")
+    processing_started_at: Optional[datetime] = Field(None, description="Start timestamp of video AI pipeline")
+    processing_completed_at: Optional[datetime] = Field(None, description="End timestamp of video AI pipeline")
+    processing_duration: Optional[float] = Field(None, description="Duration in seconds of video AI pipeline")
 
 
 class UploadedVideoCreate(UploadedVideoBase):
@@ -33,6 +36,9 @@ class UploadedVideoUpdate(BaseModel):
     filepath: Optional[str] = Field(None, max_length=512)
     filename: Optional[str] = Field(None, max_length=255)
     uploader_id: Optional[int] = Field(None)
+    processing_started_at: Optional[datetime] = None
+    processing_completed_at: Optional[datetime] = None
+    processing_duration: Optional[float] = None
 
 
 class UploadedVideoResponse(UploadedVideoBase):
@@ -82,6 +88,9 @@ class LegacyUploadedVideoResponse(BaseModel):
         validation_alias=AliasChoices("uploaded_by", "uploader_id"), 
         serialization_alias="uploaded_by"
     )
+    processing_started_at: Optional[datetime] = None
+    processing_completed_at: Optional[datetime] = None
+    processing_duration: Optional[float] = None
     created_at: datetime
     updated_at: datetime
 

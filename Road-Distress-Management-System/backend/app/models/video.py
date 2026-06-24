@@ -4,7 +4,7 @@ UploadedVideo database model for the Road Distress Management System.
 
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING
-from sqlalchemy import String, DateTime, ForeignKey
+from sqlalchemy import String, DateTime, ForeignKey, Float
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
@@ -39,6 +39,9 @@ class UploadedVideo(Base):
         nullable=False
     )
     processing_status: Mapped[str] = mapped_column(String(50), default="pending", nullable=False)
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_duration: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     uploader_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), 

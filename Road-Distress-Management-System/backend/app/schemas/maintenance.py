@@ -17,6 +17,9 @@ class MaintenanceTaskBase(BaseModel):
     assigned_to: Optional[int] = Field(None, description="ID of the user assigned to this task")
     due_date: Optional[datetime] = Field(None, description="Optional due date for the repairs")
     status: str = Field("scheduled", max_length=50, description="Current task status: scheduled, in_progress, completed, cancelled")
+    estimated_response_time: Optional[str] = Field(None, max_length=100, description="Estimated response timeframe")
+    maintenance_category: Optional[str] = Field(None, max_length=100, description="Maintenance category type")
+    estimated_cost: Optional[int] = Field(None, description="Estimated cost of repairs in INR")
 
 
 class MaintenanceTaskCreate(MaintenanceTaskBase):
@@ -36,6 +39,9 @@ class MaintenanceTaskUpdate(BaseModel):
     assigned_to: Optional[int] = None
     due_date: Optional[datetime] = None
     status: Optional[str] = Field(None, max_length=50)
+    estimated_response_time: Optional[str] = Field(None, max_length=100)
+    maintenance_category: Optional[str] = Field(None, max_length=100)
+    estimated_cost: Optional[int] = None
 
 
 class MaintenanceTaskResponse(MaintenanceTaskBase):

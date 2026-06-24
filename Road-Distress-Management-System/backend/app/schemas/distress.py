@@ -18,6 +18,11 @@ class RoadDistressBase(BaseModel):
     longitude: float = Field(..., description="GPS Longitude coordinate")
     image_url: Optional[str] = Field(None, max_length=512, description="Optional URL to distress image frame")
     status: str = Field("detected", max_length=50, description="Status of the distress record")
+    video_id: Optional[int] = Field(None, description="Associated video ID")
+    frame_number: Optional[int] = Field(None, description="Frame number within video")
+    video_timestamp: Optional[float] = Field(None, description="Timestamp offset in seconds within video")
+    source_type: Optional[str] = Field("manual", max_length=50, description="Source: video, image, manual")
+    detection_image_path: Optional[str] = Field(None, max_length=512, description="Path to bounding box detection image file")
 
 
 class RoadDistressCreate(RoadDistressBase):

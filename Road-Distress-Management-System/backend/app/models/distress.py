@@ -4,13 +4,14 @@ RoadDistress database model for the Road Distress Management System.
 
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
-from sqlalchemy import String, Float, DateTime
+from sqlalchemy import String, Float, DateTime, ForeignKey, Integer
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
 
 if TYPE_CHECKING:
     from app.models.maintenance import MaintenanceTask
+    from app.models.video import UploadedVideo
 
 
 class RoadDistress(Base):
@@ -43,9 +44,19 @@ class RoadDistress(Base):
         nullable=False
     )
     status: Mapped[str] = mapped_column(String(50), default="detected", nullable=False)
-
+    
+    # Video pipeline metadata fields
+    video_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("uploaded_videos.id", ondelete="SET NULL"), 
+        nullable=True
+    )
+    frame_number: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    video_timestamp: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    source_type: Mapped[Optional[str]] = mapped_column(String(50), default="manual", nullable=True)
+    detection_image_path: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
 
     # Relationships
+    video: Mapped[Optional["UploadedVideo"]] = relationship("UploadedVideo")
     maintenance_tasks: Mapped[List["MaintenanceTask"]] = relationship(
         "MaintenanceTask",
         back_populates="distress",

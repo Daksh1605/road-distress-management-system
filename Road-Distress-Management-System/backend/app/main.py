@@ -14,7 +14,8 @@ from app.api.v1.routes import (
     maintenance,
     upload,
     users,
-    videos
+    videos,
+    detection
 )
 
 # Initialize FastAPI application
@@ -108,6 +109,7 @@ api_router.include_router(maintenance.router, prefix="/maintenance", tags=["Main
 api_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_router.include_router(videos.router, prefix="/videos", tags=["Video Management"])
 api_router.include_router(upload.router, prefix="/upload", tags=["Media Upload & Processing"])
+api_router.include_router(detection.router, prefix="/detection", tags=["AI Distress Detection"])
 
 # Bind centralized API version 1 router to application
 app.include_router(api_router, prefix=settings.API_V1_STR)

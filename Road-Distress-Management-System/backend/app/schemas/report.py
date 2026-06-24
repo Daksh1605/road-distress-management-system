@@ -14,6 +14,7 @@ class ReportBase(BaseModel):
     report_name: str = Field(..., max_length=255, description="Descriptive name of the report")
     report_type: str = Field(..., max_length=100, description="Format or template: PDF, CSV, JSON")
     generated_by: Optional[int] = Field(None, description="ID of the user who generated this report")
+    filepath: Optional[str] = Field(None, max_length=512, description="Physical path of the report file on disk")
 
 
 class ReportCreate(ReportBase):

@@ -34,6 +34,25 @@ def get_maintenance_schedule(
     return get_maintenance_tasks(db, skip=skip, limit=limit)
 
 
+@router.get("/recommendations", response_model=List[MaintenanceTaskResponse])
+def get_recommendations(db: Session = Depends(get_db)) -> List[MaintenanceTaskResponse]:
+    """
+    Run the Recommendation Engine on all unassigned road distresses,
+    save the computed recommendations as MaintenanceTasks, and return them.
+    """
+    from app.services.maintenance_recommendation import generate_recommendations_for_pending_distresses
+    return generate_recommendations_for_pending_distresses(db)
+
+
+@router.get("/summary")
+def get_summary(db: Session = Depends(get_db)):
+    """
+    Retrieve maintenance task summary metrics and KPIs for the dashboard.
+    """
+    from app.services.maintenance_recommendation import get_maintenance_summary_statistics
+    return get_maintenance_summary_statistics(db)
+
+
 @router.get("/{id}", response_model=MaintenanceTaskResponse)
 def get_task_by_id(id: int, db: Session = Depends(get_db)) -> MaintenanceTaskResponse:
     """

@@ -36,6 +36,11 @@ def create_distress(db: Session, distress_in: RoadDistressCreate) -> RoadDistres
         image_url=distress_in.image_url,
         status=distress_in.status,
         detected_at=distress_in.detected_at or datetime.now(),
+        video_id=distress_in.video_id,
+        frame_number=distress_in.frame_number,
+        video_timestamp=distress_in.video_timestamp,
+        source_type=distress_in.source_type,
+        detection_image_path=distress_in.detection_image_path,
     )
     db.add(db_distress)
     db.commit()

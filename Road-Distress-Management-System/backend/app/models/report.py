@@ -42,6 +42,7 @@ class Report(Base):
         nullable=False
     )
     report_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    filepath: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
 
 
     # Relationships

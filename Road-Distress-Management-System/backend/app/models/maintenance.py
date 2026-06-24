@@ -4,7 +4,7 @@ MaintenanceTask database model for the Road Distress Management System.
 
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING
-from sqlalchemy import String, Text, DateTime, ForeignKey, func
+from sqlalchemy import String, Text, DateTime, ForeignKey, func, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
 
@@ -43,6 +43,11 @@ class MaintenanceTask(Base):
         nullable=False
     )
     status: Mapped[str] = mapped_column(String(50), default="scheduled", nullable=False)
+
+    # Recommendation Engine fields
+    estimated_response_time: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    maintenance_category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    estimated_cost: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
 
     # Relationships

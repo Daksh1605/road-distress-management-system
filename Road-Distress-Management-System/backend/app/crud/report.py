@@ -30,6 +30,7 @@ def create_report(db: Session, report_in: ReportCreate) -> Report:
         report_name=report_in.report_name,
         report_type=report_in.report_type,
         generated_by=report_in.generated_by,
+        filepath=report_in.filepath,
     )
     db.add(db_report)
     db.commit()

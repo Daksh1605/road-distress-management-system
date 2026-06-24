@@ -33,6 +33,9 @@ def create_maintenance_task(db: Session, task_in: MaintenanceTaskCreate) -> Main
         assigned_to=task_in.assigned_to,
         due_date=task_in.due_date,
         status=task_in.status,
+        estimated_response_time=task_in.estimated_response_time,
+        maintenance_category=task_in.maintenance_category,
+        estimated_cost=task_in.estimated_cost,
     )
     db.add(db_task)
     db.commit()
