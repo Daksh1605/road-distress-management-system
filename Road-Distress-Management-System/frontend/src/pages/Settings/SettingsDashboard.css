@@ -1,0 +1,119 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Page Splits */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+
+.settings-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: var(--secondary-text);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  width: 100%;
+  justify-content: flex-start;
+  transition: all var(--transition-fast);
+}
+
+.settings-nav-btn:hover {
+  background: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+.settings-nav-btn--active {
+  background: var(--accent-blue-light) !important;
+  color: var(--accent-blue) !important;
+  font-weight: 600;
+}
+
+.settings-content {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-section-title {
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Form inputs styling */
+.settings-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 440px;
+}
+
+.settings-form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.settings-form-group input,
+.settings-form-group select,
+.settings-form-group textarea {
+  width: 100%;
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+}
+
+.settings-btn-save {
+  background: var(--accent-blue);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(79, 142, 247, 0.2);
+  width: max-content;
+  margin-top: 10px;
+}
+
+.settings-btn-save:hover {
+  background: var(--accent-blue-hover);
+}

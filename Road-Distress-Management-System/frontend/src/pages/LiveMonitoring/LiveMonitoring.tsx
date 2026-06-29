@@ -1,9 +1,8 @@
+import LiveMonitoringDashboard from './LiveMonitoringDashboard';
+
 function LiveMonitoring() {
-  return (
-    <div>
-      <h1>LiveMonitoring</h1>
-    </div>
-  )
+  return <LiveMonitoringDashboard />;
 }
 
-export default LiveMonitoring
+export default LiveMonitoring;
+

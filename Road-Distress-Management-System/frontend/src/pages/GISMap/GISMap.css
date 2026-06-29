@@ -1,0 +1,68 @@
+.gis-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.gis-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gis-page__content {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .gis-page__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gis-page__sidebar {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.gis-page__main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gis-page__map-wrapper {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.gis-page__bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .gis-page__bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gis-page__summary-wrapper,
+.gis-page__details-wrapper {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  min-height: 200px;
+}

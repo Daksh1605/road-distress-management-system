@@ -1,83 +1,64 @@
 import { useState, useMemo } from 'react'
 import { Search, SlidersHorizontal, AlertTriangle, AlertCircle, Info } from 'lucide-react'
+import type { RoadDistressResponse } from '../../services/api/apiService'
 import './RecentDetectionsTable.css'
 
-export type SeverityType = 'High' | 'Medium' | 'Low'
-export type StatusType = 'Pending' | 'Verified' | 'Assigned' | 'Completed'
+export type SeverityType = 'Critical' | 'High' | 'Medium' | 'Low'
+export type StatusType = 'Detected' | 'Scheduled' | 'Verified' | 'Assigned' | 'Completed'
 
-export interface DistressRecord {
-  roadId: string
-  location: string
-  distressType: string
-  severity: SeverityType
-  confidence: number
-  date: string
-  status: StatusType
+export interface RecentDetectionsTableProps {
+  data: RoadDistressResponse[]
 }
 
-const SAMPLE_DATA: DistressRecord[] = [
-  {
-    roadId: 'RD-1023',
-    location: 'Patiala',
-    distressType: 'Pothole',
-    severity: 'High',
-    confidence: 97,
-    date: 'Today',
-    status: 'Pending',
-  },
-  {
-    roadId: 'RD-1041',
-    location: 'Chandigarh',
-    distressType: 'Crack',
-    severity: 'Medium',
-    confidence: 92,
-    date: 'Today',
-    status: 'Verified',
-  },
-  {
-    roadId: 'RD-1087',
-    location: 'Ambala',
-    distressType: 'Rutting',
-    severity: 'High',
-    confidence: 95,
-    date: 'Yesterday',
-    status: 'Assigned',
-  },
-  {
-    roadId: 'RD-1104',
-    location: 'Mohali',
-    distressType: 'Edge Break',
-    severity: 'Low',
-    confidence: 88,
-    date: 'Yesterday',
-    status: 'Completed',
-  },
-]
-
-export default function RecentDetectionsTable() {
+export default function RecentDetectionsTable({ data }: RecentDetectionsTableProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSeverity, setSelectedSeverity] = useState<string>('All')
   const [selectedStatus, setSelectedStatus] = useState<string>('All')
 
+  // Helper to map backend values to frontend SeverityType
+  const mapSeverity = (severity: string): SeverityType => {
+    const s = severity.toLowerCase();
+    if (s.includes('critical')) return 'Critical';
+    if (s.includes('high')) return 'High';
+    if (s.includes('medium')) return 'Medium';
+    return 'Low';
+  };
+
+  // Helper to map backend values to frontend StatusType
+  const mapStatus = (status: string): StatusType => {
+    const s = status.toLowerCase();
+    if (s.includes('completed')) return 'Completed';
+    if (s.includes('assigned')) return 'Assigned';
+    if (s.includes('scheduled')) return 'Scheduled';
+    if (s.includes('verified')) return 'Verified';
+    return 'Detected';
+  };
+
   const filteredData = useMemo(() => {
-    return SAMPLE_DATA.filter((record) => {
+    return data.filter((record) => {
+      const roadId = `RD-${record.id}`;
+      const locationStr = `Lat: ${record.latitude.toFixed(2)}, Lon: ${record.longitude.toFixed(2)}`;
+      
       const matchesSearch =
-        record.roadId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        record.distressType.toLowerCase().includes(searchTerm.toLowerCase())
+        roadId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        locationStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.distress_type.toLowerCase().includes(searchTerm.toLowerCase())
 
+      const recordSeverity = mapSeverity(record.severity);
       const matchesSeverity =
-        selectedSeverity === 'All' || record.severity === selectedSeverity
+        selectedSeverity === 'All' || recordSeverity.toLowerCase() === selectedSeverity.toLowerCase()
 
+      const recordStatus = mapStatus(record.status);
       const matchesStatus =
-        selectedStatus === 'All' || record.status === selectedStatus
+        selectedStatus === 'All' || recordStatus.toLowerCase() === selectedStatus.toLowerCase()
 
       return matchesSearch && matchesSeverity && matchesStatus
     })
-  }, [searchTerm, selectedSeverity, selectedStatus])
+  }, [data, searchTerm, selectedSeverity, selectedStatus])
 
   const getSeverityIcon = (severity: SeverityType) => {
     switch (severity) {
+      case 'Critical':
       case 'High':
         return <AlertCircle className="distress-table__icon-badge distress-table__icon-badge--high" size={14} />
       case 'Medium':
@@ -113,6 +94,7 @@ export default function RecentDetectionsTable() {
               aria-label="Filter by Severity"
             >
               <option value="All">All Severities</option>
+              <option value="Critical">Critical</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
               <option value="Low">Low</option>
@@ -127,7 +109,8 @@ export default function RecentDetectionsTable() {
               aria-label="Filter by Status"
             >
               <option value="All">All Statuses</option>
-              <option value="Pending">Pending</option>
+              <option value="Detected">Detected</option>
+              <option value="Scheduled">Scheduled</option>
               <option value="Verified">Verified</option>
               <option value="Assigned">Assigned</option>
               <option value="Completed">Completed</option>
@@ -136,7 +119,7 @@ export default function RecentDetectionsTable() {
         </div>
       </div>
 
-      {/* Table Wrapper (makes it responsive & scrollable) */}
+      {/* Table Wrapper */}
       <div className="distress-table-wrapper">
         <table className="distress-table">
           <thead>
@@ -152,26 +135,31 @@ export default function RecentDetectionsTable() {
           </thead>
           <tbody>
             {filteredData.length > 0 ? (
-              filteredData.map((record) => (
-                <tr key={record.roadId}>
-                  <td className="distress-table__road-id">{record.roadId}</td>
-                  <td>{record.location}</td>
-                  <td>{record.distressType}</td>
-                  <td>
-                    <span className={`distress-table__badge distress-table__badge--severity-${record.severity.toLowerCase()}`}>
-                      {getSeverityIcon(record.severity)}
-                      {record.severity}
-                    </span>
-                  </td>
-                  <td className="distress-table__confidence">{record.confidence}%</td>
-                  <td>{record.date}</td>
-                  <td>
-                    <span className={`distress-table__badge distress-table__badge--status-${record.status.toLowerCase()}`}>
-                      {record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))
+              filteredData.map((record) => {
+                const displaySeverity = mapSeverity(record.severity);
+                const displayStatus = mapStatus(record.status);
+                const dateStr = record.detected_at.split('T')[0];
+                return (
+                  <tr key={record.id}>
+                    <td className="distress-table__road-id">{`RD-${record.id}`}</td>
+                    <td>{`Lat: ${record.latitude.toFixed(3)}, Lon: ${record.longitude.toFixed(3)}`}</td>
+                    <td>{record.distress_type}</td>
+                    <td>
+                      <span className={`distress-table__badge distress-table__badge--severity-${displaySeverity.toLowerCase()}`}>
+                        {getSeverityIcon(displaySeverity)}
+                        {displaySeverity}
+                      </span>
+                    </td>
+                    <td className="distress-table__confidence">{Math.round(record.confidence_score * 100)}%</td>
+                    <td>{dateStr === '2026-06-21' ? 'Today' : dateStr}</td>
+                    <td>
+                      <span className={`distress-table__badge distress-table__badge--status-${displayStatus.toLowerCase()}`}>
+                        {displayStatus}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={7} className="distress-table__empty-state">

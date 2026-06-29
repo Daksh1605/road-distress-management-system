@@ -1,9 +1,8 @@
+import ReportsDashboard from './ReportsDashboard';
+
 function Reports() {
-  return (
-    <div>
-      <h1>Reports</h1>
-    </div>
-  )
+  return <ReportsDashboard />;
 }
 
-export default Reports
+export default Reports;
+

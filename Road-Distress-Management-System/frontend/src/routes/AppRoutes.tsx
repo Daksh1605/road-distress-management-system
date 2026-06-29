@@ -10,6 +10,12 @@ import Maintenance from "../pages/Maintenance/Maintenance";
 import Reports from "../pages/Reports/Reports";
 import Settings from "../pages/Settings/Settings";
 
+// New Redesigned Pages
+import UploadVideo from "../pages/UploadVideo/UploadVideo";
+import RoadDistresses from "../pages/RoadDistresses/RoadDistresses";
+import History from "../pages/History/History";
+import Notifications from "../pages/Notifications/Notifications";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -18,10 +24,14 @@ export default function AppRoutes() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/live-monitoring" element={<LiveMonitoring />} />
+          <Route path="/upload-video" element={<UploadVideo />} />
           <Route path="/gis-map" element={<GISMap />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/reports" element={<Reports />} />
+          <Route path="/road-distresses" element={<RoadDistresses />} />
           <Route path="/maintenance" element={<Maintenance />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>

@@ -1,0 +1,152 @@
+.rep-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rep-dash__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Row 1: KPI Stats Grid */
+.rep-dash__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .rep-dash__kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .rep-dash__kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rep-kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.rep-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.rep-kpi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rep-kpi-card__label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--secondary-text);
+  letter-spacing: 0.05em;
+}
+
+.rep-kpi-card__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rep-kpi-card__icon.text-purple { background: rgba(79, 142, 247, 0.08); color: var(--accent-blue); }
+.rep-kpi-card__icon.text-blue { background: var(--accent-blue-light); color: var(--accent-blue); }
+.rep-kpi-card__icon.text-amber { background: var(--warning-light); color: var(--warning); }
+.rep-kpi-card__icon.text-green { background: var(--success-light); color: var(--success); }
+
+.rep-kpi-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rep-kpi-card__value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-text);
+  font-family: var(--font-mono);
+}
+
+.rep-kpi-card__trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--secondary-text);
+}
+
+.rep-kpi-card__trend.text-green { color: var(--success); }
+.rep-kpi-card__trend.text-amber { color: var(--warning); }
+
+/* Row 2: Grid Split of Table and Donut Chart */
+.rep-dash__grid-row {
+  display: grid;
+  grid-template-columns: 2.3fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .rep-dash__grid-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rep-dash-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rep-dash-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 10px;
+}
+
+.rep-dash-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.rep-chart-container {
+  width: 100%;
+  height: 240px;
+  position: relative;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

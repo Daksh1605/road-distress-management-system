@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   CartesianGrid,
   Legend,
@@ -8,43 +9,41 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import type { RoadDistressResponse } from '../../services/api/apiService'
 
 type DetectionTrendItem = {
   week: string
   detections: number
 }
 
-const detectionTrendData: DetectionTrendItem[] = [
-  {
-    week: 'Week 1',
-    detections: 120,
-  },
-  {
-    week: 'Week 2',
-    detections: 185,
-  },
-  {
-    week: 'Week 3',
-    detections: 240,
-  },
-  {
-    week: 'Week 4',
-    detections: 210,
-  },
-  {
-    week: 'Week 5',
-    detections: 295,
-  },
-  {
-    week: 'Week 6',
-    detections: 340,
-  },
-]
+export interface DetectionTrendChartProps {
+  data: RoadDistressResponse[]
+}
 
-function DetectionTrendChart() {
+function DetectionTrendChart({ data }: DetectionTrendChartProps) {
+  const trendData = useMemo((): DetectionTrendItem[] => {
+    const counts: Record<string, number> = {};
+    
+    data.forEach((item) => {
+      // Extract YYYY-MM-DD from timestamp
+      const dateStr = item.detected_at.split('T')[0];
+      counts[dateStr] = (counts[dateStr] || 0) + 1;
+    });
+
+    const sortedDates = Object.keys(counts).sort();
+    const mapped = sortedDates.map((date) => ({
+      week: date,
+      detections: counts[date]
+    }));
+
+    return mapped.length > 0 ? mapped : [
+      { week: 'No Data', detections: 0 }
+    ];
+  }, [data]);
+
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={detectionTrendData}>
+      <LineChart data={trendData}>
         <CartesianGrid stroke="rgba(148, 163, 184, 0.18)" strokeDasharray="4 4" />
         <XAxis dataKey="week" stroke="#94a3b8" tickLine={false} />
         <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />

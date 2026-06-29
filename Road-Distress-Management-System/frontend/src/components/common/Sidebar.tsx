@@ -8,12 +8,18 @@ import {
   FileText,
   Wrench,
   Settings,
+  Upload,
+  ShieldAlert,
+  History,
+  Bell,
+  HardDrive,
+  LogOut,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from 'lucide-react'
 import './Sidebar.css'
 
-// Interfaces for component props
 interface LucideIconProps {
   size?: number | string
   className?: string
@@ -23,6 +29,7 @@ interface SidebarMenuItem {
   path: string
   label: string
   icon: ComponentType<LucideIconProps>
+  badge?: number
 }
 
 export default function Sidebar() {
@@ -35,19 +42,29 @@ export default function Sidebar() {
       icon: LayoutDashboard,
     },
     {
+      path: '/live-monitoring',
+      label: 'Live Detection',
+      icon: Radar,
+    },
+    {
+      path: '/upload-video',
+      label: 'Upload Video',
+      icon: Upload,
+    },
+    {
       path: '/gis-map',
       label: 'GIS Map',
       icon: Map,
     },
     {
-      path: '/live-monitoring',
-      label: 'Live Monitoring',
-      icon: Radar,
+      path: '/road-distresses',
+      label: 'Road Distresses',
+      icon: ShieldAlert,
     },
     {
-      path: '/analytics',
-      label: 'Analytics',
-      icon: BarChart3,
+      path: '/maintenance',
+      label: 'Maintenance',
+      icon: Wrench,
     },
     {
       path: '/reports',
@@ -55,9 +72,20 @@ export default function Sidebar() {
       icon: FileText,
     },
     {
-      path: '/maintenance',
-      label: 'Maintenance',
-      icon: Wrench,
+      path: '/analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+    },
+    {
+      path: '/history',
+      label: 'History',
+      icon: History,
+    },
+    {
+      path: '/notifications',
+      label: 'Notifications',
+      icon: Bell,
+      badge: 2,
     },
     {
       path: '/settings',
@@ -71,61 +99,86 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'sidebar--collapsed' : ''}`}>
-      {/* Top Header Section */}
-      <div className="sidebar__header">
-        <div className="sidebar__brand">
-          {!isCollapsed ? (
-            <span className="sidebar__brand-full" title="Road Distress Management System">
-              Road Distress MS
-            </span>
-          ) : (
-            <span className="sidebar__brand-short" title="Road Distress Management System">
-              RDMS
+    <aside className={`sidebar-rebuilt ${isCollapsed ? 'sidebar-rebuilt--collapsed' : ''}`}>
+      {/* Top Logo */}
+      <div className="sidebar-rebuilt__header">
+        <div className="sidebar-rebuilt__brand">
+          <Shield className="sidebar-rebuilt__logo-icon" size={20} style={{ color: '#4F8EF7' }} />
+          {!isCollapsed && (
+            <span className="sidebar-rebuilt__brand-full font-bold">
+              RoadVision <span style={{ color: '#4F8EF7' }}>AI</span>
             </span>
           )}
         </div>
         <button
-          className="sidebar__toggle-btn"
+          className="sidebar-rebuilt__toggle-btn"
           onClick={toggleSidebar}
           type="button"
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
         </button>
       </div>
 
-      {/* Main Navigation Section */}
-      <nav className="sidebar__nav" aria-label="Main Navigation">
-        <ul className="sidebar__nav-list">
+      {/* Nav List */}
+      <nav className="sidebar-rebuilt__nav" aria-label="Main Navigation">
+        <ul className="sidebar-rebuilt__nav-list">
           {menuItems.map((item) => (
-            <li key={item.path} className="sidebar__nav-item">
+            <li key={item.path} className="sidebar-rebuilt__nav-item">
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `sidebar__nav-link ${isActive ? 'sidebar__nav-link--active' : ''}`
+                  `sidebar-rebuilt__nav-link ${isActive ? 'sidebar-rebuilt__nav-link--active' : ''}`
                 }
                 title={isCollapsed ? item.label : undefined}
               >
-                <item.icon className="sidebar__nav-icon" size={20} />
-                {!isCollapsed && <span className="sidebar__nav-label">{item.label}</span>}
+                <item.icon className="sidebar-rebuilt__nav-icon" size={16} />
+                {!isCollapsed && <span className="sidebar-rebuilt__nav-label">{item.label}</span>}
+                {!isCollapsed && item.badge && (
+                  <span className="sidebar-rebuilt__nav-badge">{item.badge}</span>
+                )}
               </NavLink>
             </li>
           ))}
         </ul>
       </nav>
 
-      {/* Bottom User Profile Section */}
-      <div className="sidebar__footer">
-        <div className="sidebar__profile">
-          <div className="sidebar__profile-avatar" aria-hidden="true">
-            DA
+      {/* Storage card styled matching dark theme */}
+      {!isCollapsed && (
+        <div className="sidebar-rebuilt-storage-card">
+          <div className="sidebar-rebuilt-storage-card__header">
+            <HardDrive size={13} style={{ color: '#4F8EF7' }} />
+            <span>GIS Storage Capacity</span>
           </div>
+          <div className="sidebar-rebuilt-storage-card__track">
+            <div className="sidebar-rebuilt-storage-card__fill" style={{ width: '78.4%' }}></div>
+          </div>
+          <div className="sidebar-rebuilt-storage-card__labels">
+            <span>78.4 GB occupied</span>
+            <span>100 GB</span>
+          </div>
+        </div>
+      )}
+
+      {/* Profile Card & Logout Footer */}
+      <div className="sidebar-rebuilt__footer">
+        <div className="sidebar-rebuilt__profile">
+          <div className="sidebar-rebuilt__profile-avatar">DA</div>
           {!isCollapsed && (
-            <div className="sidebar__profile-info">
-              <span className="sidebar__profile-name">Daksh Agarwal</span>
-              <span className="sidebar__profile-role">Admin Engineer</span>
+            <div className="sidebar-rebuilt__profile-info">
+              <span className="sidebar-rebuilt__profile-name">Daksh Agarwal</span>
+              <span className="sidebar-rebuilt__profile-role">Admin Control</span>
             </div>
+          )}
+          {!isCollapsed && (
+            <button
+              className="sidebar-rebuilt__logout-btn"
+              onClick={() => alert("Logging out of system...")}
+              title="Logout session"
+              type="button"
+            >
+              <LogOut size={14} />
+            </button>
           )}
         </div>
       </div>

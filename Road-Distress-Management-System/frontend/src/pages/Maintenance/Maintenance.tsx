@@ -1,9 +1,7 @@
+import MaintenanceDashboard from './MaintenanceDashboard';
+
 function Maintenance() {
-  return (
-    <div>
-      <h1>Maintenance</h1>
-    </div>
-  )
+  return <MaintenanceDashboard />;
 }
 
-export default Maintenance
+export default Maintenance;

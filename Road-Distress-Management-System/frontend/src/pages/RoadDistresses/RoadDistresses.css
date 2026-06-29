@@ -1,0 +1,217 @@
+.distress-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.distress-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Filters bar card */
+.distress-filters {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.distress-filters__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 320px;
+  width: 100%;
+}
+
+.distress-filters__search-input {
+  width: 100%;
+  padding-left: 36px;
+  border-radius: var(--radius-md);
+}
+
+.distress-filters__search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--secondary-text);
+  pointer-events: none;
+}
+
+.distress-filters__selectors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.distress-filters__select {
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  background-color: var(--primary-bg);
+}
+
+/* Table grid card */
+.distress-table-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 0;
+  overflow: hidden;
+}
+
+.distress-table-card__header-pad {
+  padding: 20px 20px 8px 20px;
+}
+
+.distress-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.distress-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.distress-table th {
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.distress-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.distress-table tbody tr:hover {
+  background: #FAF9F6;
+}
+
+/* Custom details cells */
+.distress-table__id-cell {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.distress-table__img-cell {
+  width: 54px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--secondary-bg);
+  object-fit: cover;
+  border: 1px solid var(--card-border);
+}
+
+.distress-table__type-cell {
+  font-weight: 600;
+}
+
+.distress-table__gps {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--secondary-text);
+}
+
+.distress-table__conf-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.distress-table__conf-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--secondary-bg);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+
+.distress-table__conf-fill {
+  height: 100%;
+  background: var(--accent-blue);
+  border-radius: 2px;
+}
+
+.distress-table__conf-val {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  width: 32px;
+  text-align: right;
+}
+
+/* Pager control footer */
+.distress-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--card-border);
+  background: var(--secondary-bg);
+}
+
+.distress-pager__info {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+.distress-pager__btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.distress-pager__btn {
+  background: white;
+  border: 1px solid var(--card-border);
+  color: var(--primary-text);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.distress-pager__btn:hover:not(:disabled) {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.distress-pager__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Action button items */
+.distress-action-btn {
+  background: white;
+  border: 1px solid var(--card-border);
+  color: var(--secondary-text);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.distress-action-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}

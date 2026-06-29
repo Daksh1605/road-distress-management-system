@@ -1,24 +1,26 @@
 import { useState, useEffect, useRef } from 'react'
-import { useLocation, Link } from 'react-router-dom'
-import { Search, Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Search, Bell, MapPin, Calendar, Sun, Moon, User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import './TopNavbar.css'
 
 export default function TopNavbar() {
-  const location = useLocation()
-  const [dateTime, setDateTime] = useState(new Date())
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const [isDark, setIsDark] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [unreadNotifications, setUnreadNotifications] = useState(3)
+  const [currentDate, setCurrentDate] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Dynamic Ticking Clock
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setDateTime(new Date())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
-  // Close dropdown on click outside
+  useEffect(() => {
+    const formatted = new Date().toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    setCurrentDate(formatted);
+  }, []);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -29,86 +31,75 @@ export default function TopNavbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Get matching page title from route path
-  const getPageTitle = (pathname: string) => {
-    const path = pathname.toLowerCase()
-    if (path === '/' || path === '/dashboard') return 'Dashboard'
-    if (path === '/gis-map') return 'GIS Map Overview'
-    if (path === '/live-monitoring') return 'Live Monitoring Feeds'
-    if (path === '/analytics') return 'Analytics & Trends'
-    if (path === '/reports') return 'Generated Reports'
-    if (path === '/maintenance') return 'Maintenance Board'
-    if (path === '/settings') return 'System Settings'
-    return 'Road Distress MS'
-  }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (search.trim()) {
+      alert(`Searching for: "${search}"`);
+    }
+  };
 
-  // Formatting Date and Time
-  const formattedDateTime = dateTime.toLocaleString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true,
-  })
-
-  const handleNotificationClick = () => {
-    // Clear notifications for demo purposes
-    setUnreadNotifications(0)
-    alert('Notifications panel opened (Mock).')
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    alert('Global Search triggered (Mock).')
-  }
+  const handleToggleTheme = () => {
+    setIsDark(!isDark);
+    alert("Theme toggle clicked (Mock). Dashboard is optimized for commercial light mode.");
+  };
 
   return (
     <header className="top-navbar" aria-label="Top Navigation Bar">
-      {/* Left Area: Title and Clock */}
+      {/* Left side: Large rounded search bar */}
       <div className="top-navbar__left">
-        <h1 className="top-navbar__title">{getPageTitle(location.pathname)}</h1>
-        <span className="top-navbar__clock" aria-live="polite">
-          {formattedDateTime}
-        </span>
-      </div>
-
-      {/* Right Area: Search, Notifications, Profile Dropdown */}
-      <div className="top-navbar__right">
-        {/* Global Search Bar */}
-        <form onSubmit={handleSearchSubmit} className="top-navbar__search-form">
+        <form onSubmit={handleSearch} className="top-navbar__search-form">
           <div className="top-navbar__search-wrapper">
             <Search className="top-navbar__search-icon" size={16} />
             <input
               type="text"
-              placeholder="Search anything..."
+              placeholder="Search roads, videos, locations..."
               className="top-navbar__search-input"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               aria-label="Global Search"
             />
           </div>
         </form>
+      </div>
 
-        {/* Notifications Icon with Badge */}
+      {/* Right side: Status items and user widget */}
+      <div className="top-navbar__right">
+        {/* Location Widget */}
+        <div className="top-navbar__widget" title="Active Operations Center">
+          <MapPin size={15} style={{ color: 'var(--accent-blue)' }} />
+          <span className="font-semibold">Mumbai Division</span>
+        </div>
+
+        {/* Calendar Widget */}
+        <div className="top-navbar__widget">
+          <Calendar size={15} />
+          <span>{currentDate}</span>
+        </div>
+
+        {/* Notifications Tray Bell */}
         <button
-          className="top-navbar__btn top-navbar__btn--notify"
-          onClick={handleNotificationClick}
+          className="top-navbar__btn"
+          onClick={() => navigate('/notifications')}
           type="button"
-          aria-label={`${unreadNotifications} unread notifications`}
+          aria-label="Notifications Center"
+          title="Notifications Center"
         >
-          <Bell size={20} />
-          {unreadNotifications > 0 && (
-            <span className="top-navbar__badge" aria-hidden="true">
-              {unreadNotifications}
-            </span>
-          )}
+          <Bell size={18} />
+          <span className="top-navbar__badge-dot" />
         </button>
 
-        {/* Divider */}
-        <div className="top-navbar__divider" aria-hidden="true" />
+        {/* Theme Toggle Button */}
+        <button
+          className="top-navbar__btn"
+          onClick={handleToggleTheme}
+          type="button"
+          aria-label="Toggle Dark Mode"
+          title="Toggle Dark Mode"
+        >
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
-        {/* User Profile Dropdown */}
+        {/* Profile Avatar Widget */}
         <div className="top-navbar__profile-dropdown" ref={dropdownRef}>
           <button
             className="top-navbar__profile-btn"
@@ -118,15 +109,19 @@ export default function TopNavbar() {
             type="button"
           >
             <div className="top-navbar__avatar">DA</div>
-            <span className="top-navbar__user-name">Daksh Agarwal</span>
             <ChevronDown
-              size={14}
+              size={12}
               className={`top-navbar__chevron ${dropdownOpen ? 'top-navbar__chevron--open' : ''}`}
             />
           </button>
 
           {dropdownOpen && (
             <div className="top-navbar__menu" role="menu" aria-label="User actions">
+              <div className="top-navbar__menu-header">
+                <span className="font-bold">Daksh Agarwal</span>
+                <span className="small-caption">Admin Engineer</span>
+              </div>
+              <div className="top-navbar__menu-divider" role="separator" />
               <Link
                 to="/settings"
                 className="top-navbar__menu-item"
@@ -165,3 +160,4 @@ export default function TopNavbar() {
     </header>
   )
 }
+

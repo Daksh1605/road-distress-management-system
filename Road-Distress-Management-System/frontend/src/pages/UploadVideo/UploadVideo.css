@@ -1,0 +1,314 @@
+.upload-video {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.upload-video__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Page Split layout */
+.upload-video__grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .upload-video__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.upload-video__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.upload-video__main {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Drag upload section */
+.upload-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 24px 20px;
+}
+
+.upload-dropzone {
+  border: 2px dashed var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--secondary-bg);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-light);
+}
+
+.upload-dropzone--dragging {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-light);
+  transform: scale(0.99);
+}
+
+.upload-dropzone__icon-wrapper {
+  color: var(--accent-blue);
+  background: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.upload-dropzone__text-main {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.upload-dropzone__text-sub {
+  font-size: 11px;
+  color: var(--secondary-text);
+}
+
+/* Selected list items */
+.selected-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.selected-file-item {
+  background: var(--secondary-bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid transparent;
+}
+
+.selected-file-item__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.selected-file-item__icon {
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.selected-file-item__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.selected-file-item__name {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-file-item__size {
+  font-size: 10px;
+  color: var(--secondary-text);
+}
+
+.selected-file-item__btn-remove {
+  background: transparent;
+  color: var(--secondary-text);
+}
+
+.selected-file-item__btn-remove:hover {
+  color: var(--danger);
+}
+
+.btn-upload-submit {
+  width: 100%;
+  background: var(--accent-blue);
+  color: white;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(79, 142, 247, 0.2);
+  margin-top: 14px;
+}
+
+.btn-upload-submit:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+}
+
+.btn-upload-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Storage cloud card widgets */
+.cloud-storage-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cloud-storage-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cloud-storage-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cloud-storage-card__total {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.cloud-storage-card__bar-wrapper {
+  height: 6px;
+  background: var(--secondary-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+
+.cloud-storage-card__bar-fill {
+  height: 100%;
+  background: var(--accent-blue);
+  border-radius: 3px;
+}
+
+.cloud-storage-card__breakdowns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cloud-storage-breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.cloud-storage-breakdown-row__label {
+  color: var(--secondary-text);
+}
+
+.cloud-storage-breakdown-row__value {
+  font-weight: 600;
+}
+
+/* Videos List Tables */
+.videos-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--card-border);
+}
+
+.videos-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.videos-table th {
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 12px 16px;
+}
+
+.videos-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 13px;
+}
+
+.videos-table tbody tr:hover {
+  background: #FAF9F6;
+}
+
+.videos-table__filename-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.videos-table__file-icon {
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.videos-table__date {
+  color: var(--secondary-text);
+  font-size: 12px;
+}
+
+.videos-table__status-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+.videos-table__status-badge--completed { background: var(--success-light); color: var(--success); }
+.videos-table__status-badge--processing { background: var(--accent-blue-light); color: var(--accent-blue); }
+.videos-table__status-badge--failed { background: var(--danger-light); color: var(--danger); }
+
+.videos-table__btn-delete {
+  background: transparent;
+  color: var(--secondary-text);
+  cursor: pointer;
+}
+
+.videos-table__btn-delete:hover {
+  color: var(--danger);
+}

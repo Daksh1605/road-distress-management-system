@@ -1,0 +1,82 @@
+.distress-trend-card {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  width: 100%;
+}
+
+.distress-trend-card:hover {
+  border-color: rgba(192, 132, 252, 0.22);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.distress-trend-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.distress-trend-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.distress-trend-card__icon {
+  flex-shrink: 0;
+}
+
+.distress-trend-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.distress-trend-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.distress-trend-card__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.distress-trend-card__canvas {
+  width: 100%;
+}
+
+/* Accent Colors */
+.text-purple { color: #c084fc; }
+.text-red { color: #f87171; }
+
+@media (max-width: 640px) {
+  .distress-trend-card {
+    padding: 1.25rem;
+  }
+  
+  .distress-trend-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}

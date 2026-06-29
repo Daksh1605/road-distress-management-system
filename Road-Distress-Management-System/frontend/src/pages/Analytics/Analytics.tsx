@@ -1,9 +1,7 @@
+import AnalyticsDashboard from './AnalyticsDashboard';
+
 function Analytics() {
-  return (
-    <div>
-      <h1>Analytics</h1>
-    </div>
-  )
+  return <AnalyticsDashboard />;
 }
 
-export default Analytics
+export default Analytics;

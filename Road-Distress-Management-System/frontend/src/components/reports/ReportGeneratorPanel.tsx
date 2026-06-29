@@ -41,6 +41,9 @@ interface ReportGeneratorPanelProps {
   onExportPdf?: (summary: ReportSummary) => void;
   onExportCsv?: (summary: ReportSummary) => void;
   onEmail?: (summary: ReportSummary) => void;
+  videos?: any[];
+  onGeneratePdfReport?: (videoId: number) => Promise<void>;
+  onGenerateExcelReport?: (videoId: number) => Promise<void>;
 }
 
 const DEFAULT_FILTERS: ReportFilters = {
@@ -112,12 +115,44 @@ export default function ReportGeneratorPanel({
   onExportPdf,
   onExportCsv,
   onEmail,
+  videos = [],
+  onGeneratePdfReport,
+  onGenerateExcelReport
 }: ReportGeneratorPanelProps) {
   const [filters, setFilters] = useState<ReportFilters>({ ...DEFAULT_FILTERS });
   const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
   const [summary, setSummary] = useState<ReportSummary | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportAction, setExportAction] = useState<'pdf' | 'csv' | 'email' | null>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<string>('');
+  const [isCompiling, setIsCompiling] = useState<boolean>(false);
+  const [isCompilingExcel, setIsCompilingExcel] = useState<boolean>(false);
+
+  const handleCompilePdf = async () => {
+    if (!selectedVideoId || !onGeneratePdfReport) return;
+    setIsCompiling(true);
+    try {
+      await onGeneratePdfReport(Number(selectedVideoId));
+      setSelectedVideoId('');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCompiling(false);
+    }
+  };
+
+  const handleCompileExcel = async () => {
+    if (!selectedVideoId || !onGenerateExcelReport) return;
+    setIsCompilingExcel(true);
+    try {
+      await onGenerateExcelReport(Number(selectedVideoId));
+      setSelectedVideoId('');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCompilingExcel(false);
+    }
+  };
 
   useEffect(() => {
     if (filters.state && STATES_AND_DISTRICTS[filters.state]) {
@@ -202,6 +237,50 @@ export default function ReportGeneratorPanel({
         {/* Filters */}
         <div className="rep-gen-panel__filters">
           <h3 className="rep-gen-panel__section-label">Report Filters</h3>
+
+          {videos && videos.length > 0 && (
+            <div className="rep-gen-panel__group" style={{ marginBottom: '20px', borderBottom: '1px solid rgba(148, 163, 184, 0.1)', paddingBottom: '15px' }}>
+              <label className="rep-gen-panel__label" htmlFor="rep-video-select" style={{ color: '#c084fc', fontWeight: 'bold' }}>
+                <FileText size={14} className="rep-gen-panel__label-icon" />
+                Compile Video Safety Reports
+              </label>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
+                <select
+                  id="rep-video-select"
+                  className="rep-gen-panel__select"
+                  value={selectedVideoId}
+                  onChange={(e) => setSelectedVideoId(e.target.value)}
+                  disabled={isCompiling || isCompilingExcel}
+                  style={{ flexGrow: 1, minWidth: '200px' }}
+                >
+                  <option value="">-- Choose Completed Video Run --</option>
+                  {videos.map((vid) => (
+                    <option key={vid.id} value={vid.id}>
+                      {vid.filename} (ID: {vid.id})
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="rep-gen-panel__btn rep-gen-panel__btn--primary"
+                  onClick={handleCompilePdf}
+                  disabled={!selectedVideoId || isCompiling || isCompilingExcel}
+                  style={{ whiteSpace: 'nowrap', marginTop: 0, padding: '0 16px', height: '36px' }}
+                >
+                  {isCompiling ? "Compiling..." : "Generate PDF"}
+                </button>
+                <button
+                  type="button"
+                  className="rep-gen-panel__btn rep-gen-panel__btn--primary"
+                  onClick={handleCompileExcel}
+                  disabled={!selectedVideoId || isCompiling || isCompilingExcel}
+                  style={{ whiteSpace: 'nowrap', marginTop: 0, padding: '0 16px', height: '36px', backgroundColor: '#10b981' }}
+                >
+                  {isCompilingExcel ? "Compiling..." : "Generate Excel Report"}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="rep-gen-panel__filter-grid">
             <div className="rep-gen-panel__group">

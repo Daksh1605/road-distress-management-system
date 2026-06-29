@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Video,
   Image,
@@ -57,57 +58,59 @@ export function ActionButton({
 }
 
 export default function QuickActions() {
+  const navigate = useNavigate();
+
   const actions: ActionItem[] = [
     {
       id: 'upload-video',
       label: 'Upload Video',
       icon: Video,
-      onClick: () => alert('Upload Video trigger: select a distress recording MP4/AVI file.'),
+      onClick: () => navigate('/live-monitoring'),
       variant: 'primary',
     },
     {
       id: 'upload-images',
       label: 'Upload Images',
       icon: Image,
-      onClick: () => alert('Upload Images trigger: upload photos of road anomalies.'),
+      onClick: () => navigate('/live-monitoring'),
       variant: 'primary',
     },
     {
       id: 'live-monitoring',
       label: 'Start Live Monitoring',
       icon: Radar,
-      onClick: () => alert('Start Live Monitoring trigger: initiating connection to vehicle camera feeds.'),
+      onClick: () => navigate('/live-monitoring'),
       variant: 'warning',
     },
     {
       id: 'generate-report',
       label: 'Generate Report',
       icon: FileText,
-      onClick: () => alert('Generate Report trigger: compiling monthly distress summary report PDF.'),
+      onClick: () => navigate('/reports'),
     },
     {
       id: 'export-data',
       label: 'Export Data',
       icon: Download,
-      onClick: () => alert('Export Data trigger: exporting all records as CSV.'),
+      onClick: () => navigate('/reports'),
     },
     {
       id: 'open-gis',
       label: 'Open GIS Map',
       icon: Map,
-      onClick: () => alert('Open GIS Map trigger: opening high-definition map view.'),
+      onClick: () => navigate('/gis-map'),
     },
     {
       id: 'schedule-repair',
       label: 'Schedule Repair',
       icon: Wrench,
-      onClick: () => alert('Schedule Repair trigger: assigning crew dispatch in maintenance board.'),
+      onClick: () => navigate('/maintenance'),
     },
     {
       id: 'view-critical',
       label: 'View Critical Distresses',
       icon: AlertTriangle,
-      onClick: () => alert('View Critical Distresses trigger: displaying priority-1 high severity incidents.'),
+      onClick: () => navigate('/analytics'),
       variant: 'danger',
     },
   ]

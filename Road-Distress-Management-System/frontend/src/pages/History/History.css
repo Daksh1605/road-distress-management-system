@@ -1,0 +1,124 @@
+.hist-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hist-page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Page splits */
+.hist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .hist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hist-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hist-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.hist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hist-item {
+  padding: 10px 12px;
+  background: var(--secondary-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all var(--transition-fast);
+}
+
+.hist-item:hover {
+  background: white;
+  border-color: var(--card-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.hist-item__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.hist-item__icon-wrapper {
+  background: var(--accent-blue-light);
+  color: var(--accent-blue);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hist-item__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hist-item__title {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hist-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--secondary-text);
+}
+
+.hist-item__btn-download {
+  background: white;
+  border: 1px solid var(--card-border);
+  color: var(--accent-blue);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.hist-item__btn-download:hover {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}

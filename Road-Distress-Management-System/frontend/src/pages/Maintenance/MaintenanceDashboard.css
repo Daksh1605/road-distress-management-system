@@ -1,0 +1,273 @@
+.mnt-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mnt-dash__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Row 1: KPI Stats Grid */
+.mnt-dash__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .mnt-dash__kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .mnt-dash__kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mnt-kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.mnt-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.mnt-kpi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mnt-kpi-card__label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--secondary-text);
+  letter-spacing: 0.05em;
+}
+
+.mnt-kpi-card__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mnt-kpi-card__icon--blue { background: var(--accent-blue-light); color: var(--accent-blue); }
+.mnt-kpi-card__icon--amber { background: var(--warning-light); color: var(--warning); }
+.mnt-kpi-card__icon--green { background: var(--success-light); color: var(--success); }
+.mnt-kpi-card__icon--purple { background: rgba(79, 142, 247, 0.08); color: var(--accent-blue); }
+
+.mnt-kpi-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mnt-kpi-card__value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-text);
+  font-family: var(--font-mono);
+}
+
+.mnt-kpi-card__trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--secondary-text);
+}
+
+.mnt-kpi-card__trend--green { color: var(--success); }
+.mnt-kpi-card__trend--amber { color: var(--warning); }
+
+/* Splits layouts */
+.mnt-dash__grid-row {
+  display: grid;
+  gap: 16px;
+}
+
+.mnt-dash__grid-row--70-30 {
+  grid-template-columns: 2.3fr 1fr;
+}
+
+.mnt-dash__grid-row--equal {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 1024px) {
+  .mnt-dash__grid-row--70-30,
+  .mnt-dash__grid-row--equal {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mnt-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mnt-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 10px;
+}
+
+.mnt-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Kanban boards layout */
+.mnt-kanban {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .mnt-kanban {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mnt-kanban__column {
+  background: var(--secondary-bg);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--card-border);
+  min-height: 280px;
+}
+
+.mnt-kanban__column-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--secondary-text);
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 6px;
+}
+
+.mnt-kanban__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mnt-kanban-card {
+  background: white;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform var(--transition-fast);
+}
+
+.mnt-kanban-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.mnt-kanban-card__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.mnt-kanban-card__desc {
+  font-size: 10px;
+  color: var(--secondary-text);
+}
+
+.mnt-kanban-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--card-border);
+}
+
+.mnt-kanban-card__road {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--secondary-text);
+}
+
+/* Category lists */
+.mnt-schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mnt-schedule-item {
+  padding: 10px 12px;
+  background: var(--secondary-bg);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mnt-schedule-item__main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mnt-schedule-item__title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mnt-schedule-item__meta {
+  font-size: 10px;
+  color: var(--secondary-text);
+}
+
+.mnt-schedule-item__status {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 9999px;
+}
+
+.mnt-schedule-item__status--scheduled { background: rgba(79, 142, 247, 0.08); color: var(--accent-blue); }
+.mnt-schedule-item__status--in-progress { background: rgba(245, 158, 11, 0.08); color: var(--warning); }
+.mnt-schedule-item__status--done { background: rgba(67, 160, 71, 0.08); color: var(--success); }
