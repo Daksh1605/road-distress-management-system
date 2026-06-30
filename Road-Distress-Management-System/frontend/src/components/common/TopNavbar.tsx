@@ -58,9 +58,11 @@ export default function TopNavbar() {
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Global Search"
             />
+            <span className="search-shortcut">⌘ K</span>
           </div>
         </form>
       </div>
+
 
       {/* Right side: Status items and user widget */}
       <div className="top-navbar__right">

@@ -24,42 +24,45 @@ export default function KPICard({
   // Calculate SVG sparkline points
   const points = sparklineData
     .map((val, index) => {
-      const x = (index / (sparklineData.length - 1)) * 70;
-      const y = 30 - ((val - Math.min(...sparklineData)) / (Math.max(...sparklineData) - Math.min(...sparklineData) || 1)) * 25;
+      const x = (index / (sparklineData.length - 1)) * 60;
+      const y = 20 - ((val - Math.min(...sparklineData)) / (Math.max(...sparklineData) - Math.min(...sparklineData) || 1)) * 16;
       return `${x},${y}`;
     })
     .join(' ');
 
+  const titleKey = title.toLowerCase().replace(/[^a-z]/g, '');
+
   return (
     <article className="premium-kpi-card premium-card animate-fade-in" aria-label={title}>
-      <div className="kpi-card-inner">
-        <div className="kpi-card-inner__left">
-          <span className="small-caption font-bold kpi-title-label">{title}</span>
-          <p className="large-kpi-number kpi-value-num">{value}</p>
+      <div className="kpi-header-row">
+        <div className={`kpi-icon-container kpi-icon-container--${titleKey}`}>
+          {icon}
         </div>
-        <div className="kpi-card-inner__right">
-          <div className="kpi-icon-container">
-            {icon}
-          </div>
-        </div>
+        <span className="kpi-title-label">{title}</span>
       </div>
       
+      <p className="kpi-value-num">{value}</p>
+      
       <div className="kpi-card-footer">
+        <div className="kpi-trend-group">
+          <span className={`trend-icon-arrow ${isPositive ? 'text-success' : 'text-danger'}`}>
+            {isPositive ? '↑' : '↓'}
+          </span>
+          <span className={`trend-badge-text ${isPositive ? 'text-success font-semibold' : 'text-danger font-semibold'}`}>
+            {trend.replace(/[+-]/g, '')}
+          </span>
+          <span className="comparison-lbl">{comparison}</span>
+        </div>
+
         <div className="kpi-sparkline" aria-hidden="true">
-          <svg width="70" height="30">
+          <svg width="60" height="24">
             <polyline
               fill="none"
               stroke={isPositive ? 'var(--success)' : 'var(--danger)'}
-              strokeWidth="2"
+              strokeWidth="1.8"
               points={points}
             />
           </svg>
-        </div>
-        <div className="kpi-trend-group">
-          <span className={`trend-badge ${isPositive ? 'trend-badge--positive' : 'trend-badge--negative'}`}>
-            {trend}
-          </span>
-          <span className="comparison-lbl">{comparison}</span>
         </div>
       </div>
     </article>

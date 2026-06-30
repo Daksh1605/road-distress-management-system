@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   User,
   Info,
@@ -12,8 +11,24 @@ import {
   Key,
   Database,
   Server,
-  AlertTriangle
-} from 'lucide-react';
+  AlertTriangle,
+  Search,
+  Download,
+  RotateCcw,
+  Smartphone,
+  ShieldCheck,
+  Globe,
+  ArrowUpRight,
+  Settings as SettingsIcon,
+  BookOpen,
+  HelpCircle,
+  UserCheck,
+  Moon,
+  ToggleLeft,
+  X,
+  Plus,
+  Trash2
+} from "lucide-react";
 import './SettingsDashboard.css';
 
 // ----------------------------------------------------
@@ -32,6 +47,8 @@ interface AccountInfo {
   createdDate: string;
   lastLogin: string;
   accessLevel: string;
+  sessionStatus: string;
+  verificationStatus: string;
 }
 
 interface NotificationSettings {
@@ -81,8 +98,10 @@ export default function SettingsDashboard() {
   const accountInfo: AccountInfo = {
     userId: 'USR-2026-9812A',
     createdDate: '2024-11-15',
-    lastLogin: '2026-06-20 15:48:21 (IST)',
-    accessLevel: 'Level 5 (Super Admin)'
+    lastLogin: '2026-06-30 10:45:08 (IST)',
+    accessLevel: 'Level 5 (Super Admin)',
+    sessionStatus: 'Active Session',
+    verificationStatus: 'Verified Enterprise Account'
   };
 
   // 3. Notification Settings State
@@ -91,6 +110,13 @@ export default function SettingsDashboard() {
     criticalAlerts: true,
     maintenanceUpdates: false,
     weeklyReports: true
+  });
+
+  // Extra Notification channels state
+  const [extraNotifications, setExtraNotifications] = useState({
+    pushNotifications: true,
+    smsAlerts: false,
+    desktopNotifications: true
   });
 
   // 4. Security Settings State
@@ -106,6 +132,13 @@ export default function SettingsDashboard() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
+  // Mock API Keys
+  const [apiKeys, setApiKeys] = useState<Array<{ name: string; key: string; created: string }>>([
+    { name: 'Production YOLO Streamer', key: 'sk_live_2026_roadvision_a8b9c10d', created: '2025-01-20' },
+    { name: 'Local Test Gateway', key: 'sk_test_2026_roadvision_f2e4d5c6', created: '2026-02-14' }
+  ]);
+  const [newApiKeyName, setNewApiKeyName] = useState('');
+
   // 5. System Preferences State
   const [preferences, setPreferences] = useState<SystemPreferences>({
     defaultView: 'GIS Map',
@@ -114,11 +147,25 @@ export default function SettingsDashboard() {
     language: 'English (US)'
   });
 
+  const [extraPreferences, setExtraPreferences] = useState({
+    timeZone: 'UTC+05:30 (India Standard Time)',
+    distanceUnit: 'Kilometers (km)',
+    measurementSystem: 'Metric (SI)',
+    autosaveInterval: '5 minutes'
+  });
+
   // 6. Appearance & Theme State
   const [appearance, setAppearance] = useState<AppearanceSettings>({
     darkTheme: true,
     compactMode: false,
     fontSize: 'medium'
+  });
+
+  const [extraAppearance, setExtraAppearance] = useState({
+    primaryAccent: '#3B82F6',
+    cardRadius: '20px',
+    animations: true,
+    density: 'Default'
   });
 
   // 7. About System (Mock Static Data)
@@ -130,6 +177,12 @@ export default function SettingsDashboard() {
     backendStatus: 'Online'
   };
 
+  // Sidebar navigation active state
+  const [activeSection, setActiveSection] = useState('profile');
+
+  // Search filter for settings fields
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Toast / Feedback message states
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -139,7 +192,7 @@ export default function SettingsDashboard() {
     setToastType(type);
     setTimeout(() => {
       setToastMessage(null);
-    }, 4000);
+    }, 4500);
   };
 
   // ----------------------------------------------------
@@ -164,6 +217,14 @@ export default function SettingsDashboard() {
 
   const handleNotificationToggle = (field: keyof NotificationSettings) => {
     setNotifications(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+    triggerToast('Notification preferences updated.');
+  };
+
+  const handleExtraNotificationToggle = (field: 'pushNotifications' | 'smsAlerts' | 'desktopNotifications') => {
+    setExtraNotifications(prev => ({
       ...prev,
       [field]: !prev[field]
     }));
@@ -224,12 +285,28 @@ export default function SettingsDashboard() {
     triggerToast('System preference updated.');
   };
 
+  const handleExtraPreferenceChange = (field: string, value: string) => {
+    setExtraPreferences(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    triggerToast('System preference updated.');
+  };
+
   const handleAppearanceToggle = (field: 'darkTheme' | 'compactMode') => {
     setAppearance(prev => ({
       ...prev,
       [field]: !prev[field]
     }));
     triggerToast(`${field === 'darkTheme' ? 'Dark Theme' : 'Compact Mode'} toggled.`);
+  };
+
+  const handleExtraAppearanceChange = (field: string, value: string | boolean) => {
+    setExtraAppearance(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    triggerToast('Appearance settings updated.');
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -241,36 +318,332 @@ export default function SettingsDashboard() {
     triggerToast(`Font size set to ${size}.`);
   };
 
-  return (
-    <div className={`settings-dash ${appearance.compactMode ? 'settings-compact' : ''}`}>
-      {/* Page Header */}
-      <header className="settings-dash__header">
-        <h1 className="settings-dash__title">Settings</h1>
-        <p className="settings-dash__subtitle">
-          Manage account, system preferences and application configuration.
-        </p>
+  // Add API Key
+  const handleCreateApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newApiKeyName) {
+      alert('Please enter a descriptive name for the API key.');
+      return;
+    }
+    const generated = 'sk_live_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+    setApiKeys(prev => [
+      ...prev,
+      { name: newApiKeyName, key: generated, created: new Date().toISOString().split('T')[0] }
+    ]);
+    setNewApiKeyName('');
+    triggerToast('New API key generated successfully.');
+  };
 
-        {/* Dynamic Status Toast Notification inside Settings Dashboard */}
+  // Delete API Key
+  const handleDeleteApiKey = (keyToDelete: string) => {
+    if (confirm('Are you sure you want to revoke this API key? Services using it will fail.')) {
+      setApiKeys(prev => prev.filter(k => k.key !== keyToDelete));
+      triggerToast('API Key revoked.');
+    }
+  };
+
+  // Global actions
+  const handleSaveChanges = () => {
+    triggerToast('All platform preferences and configuration modules saved successfully.');
+  };
+
+  const handleResetSettings = () => {
+    if (confirm('Are you sure you want to reset current modifications back to session defaults?')) {
+      setProfile({
+        name: 'Daksh Agarwal',
+        email: 'daksh.agarwal@example.com',
+        role: 'Lead System Administrator',
+        department: 'Urban Infrastructure Operations',
+        phoneNumber: '+1 (555) 019-2834'
+      });
+      setNotifications({
+        emailNotifications: true,
+        criticalAlerts: true,
+        maintenanceUpdates: false,
+        weeklyReports: true
+      });
+      setExtraNotifications({
+        pushNotifications: true,
+        smsAlerts: false,
+        desktopNotifications: true
+      });
+      setPreferences({
+        defaultView: 'GIS Map',
+        defaultMapZoom: 14,
+        preferredReportFormat: 'PDF',
+        language: 'English (US)'
+      });
+      setAppearance({
+        darkTheme: true,
+        compactMode: false,
+        fontSize: 'medium'
+      });
+      setExtraAppearance({
+        primaryAccent: '#3B82F6',
+        cardRadius: '20px',
+        animations: true,
+        density: 'Default'
+      });
+      triggerToast('Configuration settings reset successfully.');
+    }
+  };
+
+  const handleExportConfig = () => {
+    const backupObj = {
+      exportedAt: new Date().toISOString(),
+      profile,
+      notifications,
+      extraNotifications,
+      security,
+      preferences,
+      extraPreferences,
+      appearance,
+      extraAppearance,
+      systemInfo
+    };
+    const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', `roadvision_settings_export_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    triggerToast('Configuration JSON exported successfully.');
+  };
+
+  const handleRestoreDefaults = () => {
+    if (confirm('CAUTION: Restore ALL configurations to factory defaults? This will erase custom layouts.')) {
+      setProfile({
+        name: 'Guest Operator',
+        email: 'operator@roadvision.ai',
+        role: 'System Operator',
+        department: 'General Operations',
+        phoneNumber: ''
+      });
+      setNotifications({
+        emailNotifications: false,
+        criticalAlerts: true,
+        maintenanceUpdates: false,
+        weeklyReports: false
+      });
+      setPreferences({
+        defaultView: 'Overview',
+        defaultMapZoom: 12,
+        preferredReportFormat: 'PDF',
+        language: 'English (US)'
+      });
+      setAppearance({
+        darkTheme: false,
+        compactMode: false,
+        fontSize: 'medium'
+      });
+      triggerToast('Factory default configurations restored.');
+    }
+  };
+
+  // Navigation click
+  const scrollToSection = (id: string) => {
+    setActiveSection(id);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Mock Devices List
+  const activeDevices = [
+    { name: 'Chrome Browser / Windows 11', ip: '192.168.1.45', time: 'Active Session', isCurrent: true },
+    { name: 'Safari App / iPhone 15 Pro', ip: '10.0.8.212', time: '2 hours ago', isCurrent: false },
+    { name: 'Firefox Browser / macOS Sonoma', ip: '172.16.42.98', time: '3 days ago', isCurrent: false }
+  ];
+
+  return (
+    <div className={`settings-dashboard-page animate-fade-in ${appearance.compactMode ? 'settings-compact' : ''}`}>
+
+      {/* 1. Page Header */}
+      <header className="settings-header-panel">
+        <div className="settings-header-title">
+          <div className="settings-logo-icon">
+            <SettingsIcon size={28} />
+          </div>
+          <div>
+            <h1 className="bold-page-title">Settings</h1>
+            <p className="light-secondary-text">
+              Manage your RoadVision AI account, application preferences, security, notifications, and system configuration.
+            </p>
+          </div>
+        </div>
+
+        {/* Header Toolbar */}
+        <div className="settings-toolbar">
+          <div className="settings-search-field">
+            <Search className="search-icon" size={16} />
+            <input
+              type="text"
+              placeholder="Search settings..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <button className="settings-btn settings-btn--secondary" onClick={handleExportConfig} title="Export Configuration JSON">
+            <Download size={15} /> Export Config
+          </button>
+
+          <button className="settings-btn settings-btn--secondary" onClick={handleRestoreDefaults} title="Restore Factory Defaults">
+            <RotateCcw size={15} /> Restore Defaults
+          </button>
+
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveChanges}>
+            <Save size={15} /> Save Changes
+          </button>
+        </div>
+
+        {/* Status Toast Notifications */}
         {toastMessage && (
-          <div className={`settings-save-toast ${toastType === 'error' ? 'settings-btn--danger' : ''}`}>
-            {toastType === 'error' ? <AlertTriangle size={16} /> : <CheckCircle size={16} />}
+          <div className={`settings-save-toast ${toastType === 'error' ? 'settings-toast-error' : 'settings-toast-success'}`}>
+            {toastType === 'error' ? <AlertTriangle size={15} /> : <CheckCircle size={15} />}
             <span>{toastMessage}</span>
           </div>
         )}
       </header>
 
-      {/* Row 1: Profile Settings & Account Information */}
-      <div className="settings-dash__grid-row">
-        {/* Profile Settings Card */}
-        <section className="settings-card" aria-labelledby="profile-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><User size={18} /></span>
-            <h2 id="profile-title" className="settings-card__title">Profile Settings</h2>
-          </header>
-          <div className="settings-card__body">
-            <form onSubmit={handleProfileSubmit} className="settings-form">
-              <div className="settings-form__row">
-                <div className="form-group">
+      {/* 2. Summary KPI Cards Row */}
+      <section className="settings-kpis-grid">
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container kpi-icon-container--roadsscanned" style={{ backgroundColor: 'rgba(59,130,246,0.1)' }}>
+              <User size={18} style={{ color: '#3B82F6' }} />
+            </div>
+            <span className="kpi-title-label">User Profile</span>
+          </div>
+          <p className="kpi-value-num" style={{ fontSize: '18px', marginTop: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {profile.name}
+          </p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">{profile.email}</span>
+          </div>
+        </article>
+
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: 'rgba(139,92,246,0.1)' }}>
+              <UserCheck size={18} style={{ color: '#8B5CF6' }} />
+            </div>
+            <span className="kpi-title-label">Platform Role</span>
+          </div>
+          <p className="kpi-value-num" style={{ fontSize: '18px', marginTop: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {profile.role}
+          </p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">{profile.department}</span>
+          </div>
+        </article>
+
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: 'rgba(16,185,129,0.1)' }}>
+              <Bell size={18} style={{ color: '#10B981' }} />
+            </div>
+            <span className="kpi-title-label">Notifications</span>
+          </div>
+          <p className="kpi-value-num" style={{ fontSize: '24px', marginTop: '10px' }}>
+            {((notifications.emailNotifications ? 1 : 0) +
+              (notifications.criticalAlerts ? 1 : 0) +
+              (notifications.maintenanceUpdates ? 1 : 0) +
+              (notifications.weeklyReports ? 1 : 0) +
+              (extraNotifications.pushNotifications ? 1 : 0) +
+              (extraNotifications.desktopNotifications ? 1 : 0))
+            } Channels
+          </p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">Active event alerts configured</span>
+          </div>
+        </article>
+
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: security.twoFactorAuth ? 'rgba(16,185,129,0.1)' : 'rgba(245,158,11,0.1)' }}>
+              <ShieldCheck size={18} style={{ color: security.twoFactorAuth ? '#10B981' : '#F59E0B' }} />
+            </div>
+            <span className="kpi-title-label">Security Shield</span>
+          </div>
+          <p className="kpi-value-num" style={{ fontSize: '24px', marginTop: '10px' }}>
+            {security.twoFactorAuth ? '2FA Enabled' : '2FA Inactive'}
+          </p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">{security.activeSessions} logged-in sessions</span>
+          </div>
+        </article>
+      </section>
+
+      {/* 3. 25/75 Main Layout Panel */}
+      <div className="settings-main-split">
+
+        {/* Left Sidebar Navigation (25%) */}
+        <aside className="settings-sidebar-nav">
+          <div className="sidebar-sticky-box">
+            <span className="sidebar-section-title">Dashboard Sections</span>
+            {[
+              { id: 'profile', title: 'Profile Settings', icon: <User size={16} /> },
+              { id: 'account', title: 'Account Information', icon: <Info size={16} /> },
+              { id: 'notifications', title: 'Notifications Channels', icon: <Bell size={16} /> },
+              { id: 'security', title: 'Security Control', icon: <Lock size={16} /> },
+              { id: 'preferences', title: 'System Preferences', icon: <Sliders size={16} /> },
+              { id: 'appearance', title: 'Theme & Appearance', icon: <Palette size={16} /> },
+              { id: 'status', title: 'System Engine Health', icon: <Server size={16} /> },
+              { id: 'about', title: 'About RoadVision', icon: <Cpu size={16} /> }
+            ].map(sec => (
+              <button
+                key={sec.id}
+                className={`sidebar-nav-btn ${activeSection === sec.id ? 'active' : ''}`}
+                onClick={() => scrollToSection(sec.id)}
+              >
+                {sec.icon}
+                <span>{sec.title}</span>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        {/* Right Settings Content Section (75%) */}
+        <main className="settings-content-cards-flow">
+
+          {/* SECTION 1: PROFILE SETTINGS */}
+          <section id="profile" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(59,130,246,0.1)', color: '#3B82F6' }}>
+                <User size={18} />
+              </span>
+              <h2 className="medium-section-title">Profile Settings</h2>
+            </header>
+
+            <div className="settings-card__body">
+              {/* Profile Avatar Section */}
+              <div className="profile-avatar-row">
+                <div className="profile-avatar-large">
+                  <span>{profile.name.split(' ').map(n => n[0]).join('')}</span>
+                  <div className="avatar-upload-overlay">
+                    <Smartphone size={16} />
+                  </div>
+                </div>
+                <div className="profile-avatar-actions">
+                  <span className="avatar-title font-sans">Profile Display Picture</span>
+                  <p className="avatar-description">Upload a high-resolution PNG or JPG photo. Max size: 2MB.</p>
+                  <div className="avatar-btn-row">
+                    <button className="settings-btn settings-btn--secondary" onClick={() => alert('Photo upload trigger (Simulated)')}>
+                      Upload Photo
+                    </button>
+                    <button className="settings-btn settings-btn--danger-text" onClick={() => alert('Photo removed.')}>
+                      Remove Picture
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Fields Form */}
+              <form onSubmit={handleProfileSubmit} className="settings-form-grid">
+                <div className="form-group-cell">
                   <label htmlFor="profile-name" className="form-label">Full Name</label>
                   <input
                     type="text"
@@ -281,7 +654,8 @@ export default function SettingsDashboard() {
                     className="form-input"
                   />
                 </div>
-                <div className="form-group">
+
+                <div className="form-group-cell">
                   <label htmlFor="profile-email" className="form-label">Email Address</label>
                   <input
                     type="email"
@@ -292,10 +666,8 @@ export default function SettingsDashboard() {
                     className="form-input"
                   />
                 </div>
-              </div>
 
-              <div className="settings-form__row">
-                <div className="form-group">
+                <div className="form-group-cell">
                   <label htmlFor="profile-role" className="form-label">Role</label>
                   <input
                     type="text"
@@ -306,7 +678,8 @@ export default function SettingsDashboard() {
                     className="form-input"
                   />
                 </div>
-                <div className="form-group">
+
+                <div className="form-group-cell">
                   <label htmlFor="profile-dept" className="form-label">Department</label>
                   <input
                     type="text"
@@ -317,419 +690,717 @@ export default function SettingsDashboard() {
                     className="form-input"
                   />
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label htmlFor="profile-phone" className="form-label">Phone Number</label>
-                <input
-                  type="text"
-                  id="profile-phone"
-                  name="phoneNumber"
-                  value={profile.phoneNumber}
-                  onChange={handleProfileChange}
-                  className="form-input"
-                />
-              </div>
-
-              <button type="submit" className="settings-btn settings-btn--primary">
-                <Save size={16} />
-                <span>Save Changes</span>
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {/* Account Information Card */}
-        <section className="settings-card" aria-labelledby="account-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><Info size={18} /></span>
-            <h2 id="account-title" className="settings-card__title">Account Information</h2>
-          </header>
-          <div className="settings-card__body">
-            <div className="settings-meta-grid">
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">User ID</span>
-                <span className="settings-meta-val font-mono">{accountInfo.userId}</span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Access Level</span>
-                <span className="settings-meta-val">{accountInfo.accessLevel}</span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Account Created</span>
-                <span className="settings-meta-val">{accountInfo.createdDate}</span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Last Login</span>
-                <span className="settings-meta-val font-mono">{accountInfo.lastLogin}</span>
-              </div>
-            </div>
-            <div style={{ marginTop: 'auto', padding: '1rem', background: 'rgba(192, 132, 252, 0.04)', borderRadius: '10px', border: '1px solid rgba(192, 132, 252, 0.1)' }}>
-              <p className="settings-toggle-desc" style={{ color: '#cbd5e1', fontWeight: 600 }}>System Authorization</p>
-              <p className="settings-toggle-desc" style={{ marginTop: '0.25rem' }}>
-                Your account is currently verified for core infrastructure configuration changes. Access logs are archived automatically.
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Row 2: Notification Settings & Security Settings */}
-      <div className="settings-dash__grid-row">
-        {/* Notification Settings Card */}
-        <section className="settings-card" aria-labelledby="notifications-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><Bell size={18} /></span>
-            <h2 id="notifications-title" className="settings-card__title">Notification Settings</h2>
-          </header>
-          <div className="settings-card__body">
-            <div className="settings-toggle-group">
-              {/* Toggle 1: Email */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Email Notifications</span>
-                  <span className="settings-toggle-desc">Receive email summaries of daily road detections.</span>
-                </div>
-                <label className="switch-control">
+                <div className="form-group-cell form-group-cell--full">
+                  <label htmlFor="profile-phone" className="form-label">Phone Number</label>
                   <input
-                    type="checkbox"
-                    checked={notifications.emailNotifications}
-                    onChange={() => handleNotificationToggle('emailNotifications')}
+                    type="text"
+                    id="profile-phone"
+                    name="phoneNumber"
+                    value={profile.phoneNumber}
+                    onChange={handleProfileChange}
+                    className="form-input"
                   />
-                  <span className="switch-slider"></span>
-                </label>
-              </div>
-
-              {/* Toggle 2: Critical Alerts */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Critical Alert Notifications</span>
-                  <span className="settings-toggle-desc">Instant alerts for severe structural road failures.</span>
                 </div>
-                <label className="switch-control">
-                  <input
-                    type="checkbox"
-                    checked={notifications.criticalAlerts}
-                    onChange={() => handleNotificationToggle('criticalAlerts')}
-                  />
-                  <span className="switch-slider"></span>
-                </label>
-              </div>
 
-              {/* Toggle 3: Maintenance Updates */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Maintenance Updates</span>
-                  <span className="settings-toggle-desc">Get notified when repair schedules are updated.</span>
-                </div>
-                <label className="switch-control">
-                  <input
-                    type="checkbox"
-                    checked={notifications.maintenanceUpdates}
-                    onChange={() => handleNotificationToggle('maintenanceUpdates')}
-                  />
-                  <span className="switch-slider"></span>
-                </label>
-              </div>
-
-              {/* Toggle 4: Weekly Reports */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Weekly Reports</span>
-                  <span className="settings-toggle-desc">Receive comprehensive analytical report attachments.</span>
-                </div>
-                <label className="switch-control">
-                  <input
-                    type="checkbox"
-                    checked={notifications.weeklyReports}
-                    onChange={() => handleNotificationToggle('weeklyReports')}
-                  />
-                  <span className="switch-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Security Settings Card */}
-        <section className="settings-card" aria-labelledby="security-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><Lock size={18} /></span>
-            <h2 id="security-title" className="settings-card__title">Security Settings</h2>
-          </header>
-          <div className="settings-card__body">
-            <div className="settings-security-layout">
-              {/* Active Sessions count display */}
-              <div className="active-sessions-banner">
-                <div className="active-sessions-banner__count">
-                  <span className="sessions-dot"></span>
-                  <span>{security.activeSessions} Active Sessions</span>
-                </div>
-                {security.activeSessions > 1 && (
-                  <button
-                    onClick={handleRevokeSessions}
-                    className="settings-btn settings-btn--danger"
-                    style={{ padding: '0.25rem 0.50rem', fontSize: '0.75rem', borderRadius: '4px' }}
-                  >
-                    Revoke Others
+                <div className="form-submit-row">
+                  <button type="submit" className="settings-btn settings-btn--primary">
+                    <Save size={16} /> Save Changes
                   </button>
-                )}
-              </div>
-
-              {/* Two-Factor Authentication toggle */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Two-Factor Authentication</span>
-                  <span className="settings-toggle-desc">Secure account access using authenticator tokens.</span>
                 </div>
-                <label className="switch-control">
-                  <input
-                    type="checkbox"
-                    checked={security.twoFactorAuth}
-                    onChange={handle2FAToggle}
-                  />
-                  <span className="switch-slider"></span>
-                </label>
+              </form>
+            </div>
+          </section>
+
+          {/* SECTION 2: ACCOUNT INFORMATION */}
+          <section id="account" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
+                <Info size={18} />
+              </span>
+              <h2 className="medium-section-title">Account Information</h2>
+            </header>
+
+            <div className="settings-card__body">
+              <div className="settings-meta-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
+                <div className="settings-meta-item">
+                  <span className="settings-meta-lbl">System User ID</span>
+                  <span className="settings-meta-val font-mono text-bold">{accountInfo.userId}</span>
+                </div>
+                <div className="settings-meta-item">
+                  <span className="settings-meta-lbl">Access Credentials</span>
+                  <span className="settings-meta-val">{accountInfo.accessLevel}</span>
+                </div>
+                <div className="settings-meta-item">
+                  <span className="settings-meta-lbl">Registration Date</span>
+                  <span className="settings-meta-val">{accountInfo.createdDate}</span>
+                </div>
+                <div className="settings-meta-item">
+                  <span className="settings-meta-lbl">Last Active Session</span>
+                  <span className="settings-meta-val font-mono">{accountInfo.lastLogin}</span>
+                </div>
+                <div className="settings-meta-item">
+                  <span className="settings-meta-lbl">Verification Status</span>
+                  <span className="settings-meta-val">
+                    <span className="account-badge-status verification-active">
+                      ✓ {accountInfo.verificationStatus}
+                    </span>
+                  </span>
+                </div>
+                <div className="settings-meta-item">
+                  <span className="settings-meta-lbl">Session Lifecycle</span>
+                  <span className="settings-meta-val">
+                    <span className="account-badge-status session-active">
+                      ● {accountInfo.sessionStatus}
+                    </span>
+                  </span>
+                </div>
               </div>
+            </div>
+          </section>
 
-              {/* Change Password Panel */}
-              <div className="form-group">
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordChange(!showPasswordChange)}
-                  className="settings-btn settings-btn--secondary settings-btn--full"
-                >
-                  <Key size={16} />
-                  <span>{showPasswordChange ? 'Cancel Password Change' : 'Change Password'}</span>
-                </button>
+          {/* SECTION 3: NOTIFICATION SETTINGS */}
+          <section id="notifications" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
+                <Bell size={18} />
+              </span>
+              <h2 className="medium-section-title">Notification Channels</h2>
+            </header>
 
-                {showPasswordChange && (
-                  <form onSubmit={handlePasswordSubmit} className="password-panel">
-                    {passwordError && (
-                      <div style={{ color: '#f87171', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {passwordError}
+            <div className="settings-card__body">
+              <p className="section-description-text">Configure when and where RoadVision sends alert incidents and updates.</p>
+
+              <div className="settings-toggle-group">
+                {/* Switch 1: Email Notifications */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">Email Incident Notifications</span>
+                    <span className="settings-toggle-desc">Daily summary list of AI detections on jurisdictions.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifications.emailNotifications}
+                      onChange={() => handleNotificationToggle('emailNotifications')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+
+                {/* Switch 2: Critical Alerts */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">Critical Pothole/Failure Alerts</span>
+                    <span className="settings-toggle-desc">Instant alerts for severe structural road failures.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifications.criticalAlerts}
+                      onChange={() => handleNotificationToggle('criticalAlerts')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+
+                {/* Switch 3: Maintenance Updates */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">Workforce Maintenance Updates</span>
+                    <span className="settings-toggle-desc">Receive notifications when repair crews close work tickets.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifications.maintenanceUpdates}
+                      onChange={() => handleNotificationToggle('maintenanceUpdates')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+
+                {/* Switch 4: Weekly Summary Reports */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">Weekly Analytical Summaries</span>
+                    <span className="settings-toggle-desc">Exported PDF and Excel report attachments on Sundays.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifications.weeklyReports}
+                      onChange={() => handleNotificationToggle('weeklyReports')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+
+                {/* Switch 5: Push Notifications */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">Push Alert Streams</span>
+                    <span className="settings-toggle-desc">Receive push alarms directly in your web browser interface.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={extraNotifications.pushNotifications}
+                      onChange={() => handleExtraNotificationToggle('pushNotifications')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+
+                {/* Switch 6: SMS Alerts */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">SMS Operations Alerts</span>
+                    <span className="settings-toggle-desc">Text message alerts containing precision distress GPS coordinates.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={extraNotifications.smsAlerts}
+                      onChange={() => handleExtraNotificationToggle('smsAlerts')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+
+                {/* Switch 7: Desktop Banner Notifications */}
+                <div className="settings-toggle-item">
+                  <div className="settings-toggle-details">
+                    <span className="settings-toggle-title">System Tray Desktop Notifications</span>
+                    <span className="settings-toggle-desc">Popup windows on OS status logs.</span>
+                  </div>
+                  <label className="enterprise-switch">
+                    <input
+                      type="checkbox"
+                      checked={extraNotifications.desktopNotifications}
+                      onChange={() => handleExtraNotificationToggle('desktopNotifications')}
+                    />
+                    <span className="switch-slider" />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 4: SECURITY SETTINGS */}
+          <section id="security" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>
+                <Lock size={18} />
+              </span>
+              <h2 className="medium-section-title">Security Dashboard</h2>
+            </header>
+
+            <div className="settings-card__body">
+              <div className="security-sub-sections-grid">
+
+                {/* 2FA block */}
+                <div className="security-sub-card">
+                  <span className="sub-title font-semibold">Two-Factor Authentication</span>
+                  <p className="sub-desc">Reinforce account shielding via Google/Microsoft authenticator OTP tokens.</p>
+                  <div className="sub-action-row">
+                    <span className={`status-label-pill ${security.twoFactorAuth ? 'green' : 'gold'}`}>
+                      {security.twoFactorAuth ? 'Shield Active' : 'Shield Disabled'}
+                    </span>
+                    <label className="enterprise-switch">
+                      <input
+                        type="checkbox"
+                        checked={security.twoFactorAuth}
+                        onChange={handle2FAToggle}
+                      />
+                      <span className="switch-slider" />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Active sessions block */}
+                <div className="security-sub-card">
+                  <span className="sub-title font-semibold">Authorized Session Nodes</span>
+                  <p className="sub-desc">Review browser logs active on your credential signature.</p>
+
+                  <div className="session-nodes-list">
+                    {activeDevices.map((dev, idx) => (
+                      <div key={idx} className="device-node-item">
+                        <Smartphone size={16} style={{ color: dev.isCurrent ? '#10B981' : 'var(--secondary-text)' }} />
+                        <div className="device-details">
+                          <span className="device-name">{dev.name} {dev.isCurrent && ' (Current)'}</span>
+                          <span className="device-ip font-mono">{dev.ip} &bull; {dev.time}</span>
+                        </div>
                       </div>
-                    )}
-                    <div className="form-group">
-                      <label htmlFor="curr-pwd" className="form-label">Current Password</label>
-                      <input
-                        type="password"
-                        id="curr-pwd"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="form-input"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="new-pwd" className="form-label">New Password</label>
-                      <input
-                        type="password"
-                        id="new-pwd"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className="form-input"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="conf-pwd" className="form-label">Confirm New Password</label>
-                      <input
-                        type="password"
-                        id="conf-pwd"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="form-input"
-                      />
-                    </div>
-                    <button type="submit" className="settings-btn settings-btn--primary">
-                      Update Password
+                    ))}
+                  </div>
+
+                  <div className="sub-action-row">
+                    <button className="settings-btn settings-btn--danger-text" onClick={handleRevokeSessions}>
+                      Revoke Other Sessions
+                    </button>
+                  </div>
+                </div>
+
+                {/* API Keys block */}
+                <div className="security-sub-card">
+                  <span className="sub-title font-semibold">Integrator API Keys</span>
+                  <p className="sub-desc">Authenticate AI surveillance cameras and script hooks.</p>
+
+                  <div className="api-keys-list">
+                    {apiKeys.map((keyObj, idx) => (
+                      <div key={idx} className="api-key-item">
+                        <div className="key-info">
+                          <span className="key-name font-semibold">{keyObj.name}</span>
+                          <span className="key-code font-mono">{keyObj.key.slice(0, 12)}...{keyObj.key.slice(-8)}</span>
+                        </div>
+                        <button className="revoke-key-btn" onClick={() => handleDeleteApiKey(keyObj.key)} title="Revoke API Key">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add API key form */}
+                  <form onSubmit={handleCreateApiKey} className="add-api-key-form">
+                    <input
+                      type="text"
+                      placeholder="Key purpose (e.g. Sector-4 CAM)"
+                      value={newApiKeyName}
+                      onChange={(e) => setNewApiKeyName(e.target.value)}
+                      className="form-input"
+                    />
+                    <button type="submit" className="add-key-btn">
+                      <Plus size={14} /> Generate
                     </button>
                   </form>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Row 3: System Preferences & Appearance & Theme */}
-      <div className="settings-dash__grid-row">
-        {/* System Preferences Card */}
-        <section className="settings-card" aria-labelledby="preferences-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><Sliders size={18} /></span>
-            <h2 id="preferences-title" className="settings-card__title">System Preferences</h2>
-          </header>
-          <div className="settings-card__body">
-            <div className="preferences-grid">
-              {/* Default View Selection */}
-              <div className="form-group">
-                <label htmlFor="pref-view" className="form-label">Default Dashboard View</label>
-                <select
-                  id="pref-view"
-                  value={preferences.defaultView}
-                  onChange={(e) => handlePreferenceChange('defaultView', e.target.value as any)}
-                  className="form-select"
-                >
-                  <option value="Overview">Overview</option>
-                  <option value="Live Feed">Live Feed</option>
-                  <option value="GIS Map">GIS Map</option>
-                  <option value="Analytics">Analytics</option>
-                </select>
-              </div>
-
-              {/* Default Map Zoom selection */}
-              <div className="form-group">
-                <label htmlFor="pref-zoom" className="form-label">Default Map Zoom</label>
-                <select
-                  id="pref-zoom"
-                  value={preferences.defaultMapZoom}
-                  onChange={(e) => handlePreferenceChange('defaultMapZoom', parseInt(e.target.value))}
-                  className="form-select"
-                >
-                  <option value="10">City Level (10x)</option>
-                  <option value="12">District Level (12x)</option>
-                  <option value="14">Sector Level (14x)</option>
-                  <option value="16">Street Level (16x)</option>
-                </select>
-              </div>
-
-              {/* Preferred Report Format selection */}
-              <div className="form-group">
-                <label htmlFor="pref-report" className="form-label">Preferred Report Format</label>
-                <select
-                  id="pref-report"
-                  value={preferences.preferredReportFormat}
-                  onChange={(e) => handlePreferenceChange('preferredReportFormat', e.target.value as any)}
-                  className="form-select"
-                >
-                  <option value="PDF">PDF (Enterprise Document)</option>
-                  <option value="CSV">CSV (Spreadsheet/Tables)</option>
-                  <option value="JSON">JSON (Developer Feeds)</option>
-                </select>
-              </div>
-
-              {/* Language selection */}
-              <div className="form-group">
-                <label htmlFor="pref-lang" className="form-label">Language Selection</label>
-                <select
-                  id="pref-lang"
-                  value={preferences.language}
-                  onChange={(e) => handlePreferenceChange('language', e.target.value)}
-                  className="form-select"
-                >
-                  <option value="English (US)">English (US)</option>
-                  <option value="Spanish">Español (ES)</option>
-                  <option value="French">Français (FR)</option>
-                  <option value="German">Deutsch (DE)</option>
-                  <option value="Hindi">हिन्दी (IN)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Appearance & Theme Card */}
-        <section className="settings-card" aria-labelledby="appearance-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><Palette size={18} /></span>
-            <h2 id="appearance-title" className="settings-card__title">Appearance & Theme</h2>
-          </header>
-          <div className="settings-card__body">
-            <div className="settings-toggle-group">
-              {/* Toggle Dark Theme */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Dark Theme</span>
-                  <span className="settings-toggle-desc">Toggle between high-contrast dark and light modes.</span>
                 </div>
-                <label className="switch-control">
-                  <input
-                    type="checkbox"
-                    checked={appearance.darkTheme}
-                    onChange={() => handleAppearanceToggle('darkTheme')}
-                  />
-                  <span className="switch-slider"></span>
-                </label>
-              </div>
 
-              {/* Toggle Compact Mode */}
-              <div className="settings-toggle-item">
-                <div className="settings-toggle-details">
-                  <span className="settings-toggle-title">Compact Mode</span>
-                  <span className="settings-toggle-desc">Reduce margins and padding to show more information.</span>
+                {/* Password block */}
+                <div className="security-sub-card">
+                  <span className="sub-title font-semibold">Password Management</span>
+                  <p className="sub-desc">Update your secure platform login key. Choose a strong unique pass.</p>
+
+                  <div className="sub-action-row">
+                    <button
+                      className="settings-btn settings-btn--secondary"
+                      onClick={() => setShowPasswordChange(!showPasswordChange)}
+                    >
+                      <Key size={14} /> {showPasswordChange ? 'Cancel Update' : 'Change Password'}
+                    </button>
+                  </div>
+
+                  {showPasswordChange && (
+                    <form onSubmit={handlePasswordSubmit} className="password-form-panel animate-fade-in">
+                      {passwordError && (
+                        <div className="password-error-message">
+                          {passwordError}
+                        </div>
+                      )}
+                      <div className="form-group-cell">
+                        <label htmlFor="curr-pwd" className="form-label">Current Password</label>
+                        <input
+                          type="password"
+                          id="curr-pwd"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group-cell">
+                        <label htmlFor="new-pwd" className="form-label">New Password</label>
+                        <input
+                          type="password"
+                          id="new-pwd"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="form-input"
+                        />
+                      </div>
+                      <div className="form-group-cell">
+                        <label htmlFor="conf-pwd" className="form-label">Confirm New Password</label>
+                        <input
+                          type="password"
+                          id="conf-pwd"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="form-input"
+                        />
+                      </div>
+                      <button type="submit" className="settings-btn settings-btn--primary">
+                        Update Password
+                      </button>
+                    </form>
+                  )}
                 </div>
-                <label className="switch-control">
-                  <input
-                    type="checkbox"
-                    checked={appearance.compactMode}
-                    onChange={() => handleAppearanceToggle('compactMode')}
-                  />
-                  <span className="switch-slider"></span>
-                </label>
-              </div>
-
-              {/* Selector Font Size */}
-              <div className="form-group" style={{ marginTop: '0.25rem' }}>
-                <label htmlFor="pref-font" className="form-label">Font Size</label>
-                <select
-                  id="pref-font"
-                  value={appearance.fontSize}
-                  onChange={handleFontSizeChange}
-                  className="form-select"
-                >
-                  <option value="small">Small (14px)</option>
-                  <option value="medium">Medium (16px)</option>
-                  <option value="large">Large (18px)</option>
-                </select>
               </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
 
-      {/* Row 4: About System Panel */}
-      <div className="settings-dash__grid-row settings-dash__grid-row--full">
-        <section className="settings-card" aria-labelledby="about-title">
-          <header className="settings-card__header">
-            <span className="settings-card__icon"><Cpu size={18} /></span>
-            <h2 id="about-title" className="settings-card__title">About System Panel</h2>
-          </header>
-          <div className="settings-card__body">
-            <div className="settings-meta-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Version Number</span>
-                <span className="settings-meta-val font-mono">{systemInfo.version}</span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Build Date</span>
-                <span className="settings-meta-val font-mono">{systemInfo.buildDate}</span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">YOLO Model Version</span>
-                <span className="settings-meta-val font-mono">{systemInfo.yoloModel}</span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Database Status</span>
-                <span className="settings-meta-val">
-                  <span className={`status-badge status-badge--${systemInfo.databaseStatus === 'Online' ? 'online' : 'offline'}`}>
-                    <Database size={12} />
-                    <span>{systemInfo.databaseStatus} (PostgreSQL)</span>
-                  </span>
-                </span>
-              </div>
-              <div className="settings-meta-item">
-                <span className="settings-meta-lbl">Backend Status</span>
-                <span className="settings-meta-val">
-                  <span className={`status-badge status-badge--${systemInfo.backendStatus === 'Online' ? 'online' : 'offline'}`}>
-                    <Server size={12} />
-                    <span>{systemInfo.backendStatus} (API Gateway)</span>
-                  </span>
-                </span>
+          {/* SECTION 5: SYSTEM PREFERENCES */}
+          <section id="preferences" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}>
+                <Sliders size={18} />
+              </span>
+              <h2 className="medium-section-title">System Preferences</h2>
+            </header>
+
+            <div className="settings-card__body">
+              <div className="preferences-grid">
+
+                {/* 1. Default View */}
+                <div className="form-group-cell">
+                  <label className="form-label">Default Landing View</label>
+                  <select
+                    value={preferences.defaultView}
+                    onChange={(e) => handlePreferenceChange('defaultView', e.target.value as any)}
+                    className="form-select"
+                  >
+                    <option value="Overview">Overview Dashboard</option>
+                    <option value="Live Feed">Live Detection Feed</option>
+                    <option value="GIS Map">GIS distress map</option>
+                    <option value="Analytics">Analytics Hub</option>
+                  </select>
+                </div>
+
+                {/* 2. Map Zoom */}
+                <div className="form-group-cell">
+                  <label className="form-label">Default Map Zoom</label>
+                  <select
+                    value={preferences.defaultMapZoom}
+                    onChange={(e) => handlePreferenceChange('defaultMapZoom', parseInt(e.target.value))}
+                    className="form-select"
+                  >
+                    <option value="10">City Scale (10x)</option>
+                    <option value="12">District Scale (12x)</option>
+                    <option value="14">Sector Scale (14x)</option>
+                    <option value="16">Street Detail (16x)</option>
+                  </select>
+                </div>
+
+                {/* 3. Preferred Report format */}
+                <div className="form-group-cell">
+                  <label className="form-label">Default Report Format</label>
+                  <select
+                    value={preferences.preferredReportFormat}
+                    onChange={(e) => handlePreferenceChange('preferredReportFormat', e.target.value as any)}
+                    className="form-select"
+                  >
+                    <option value="PDF">PDF Document Summary</option>
+                    <option value="CSV">Excel Spreadsheet (CSV)</option>
+                    <option value="JSON">Developer Feed (JSON)</option>
+                  </select>
+                </div>
+
+                {/* 4. Language */}
+                <div className="form-group-cell">
+                  <label className="form-label">System Locale Language</label>
+                  <select
+                    value={preferences.language}
+                    onChange={(e) => handlePreferenceChange('language', e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="English (US)">English (US)</option>
+                    <option value="Spanish">Español (ES)</option>
+                    <option value="French">Français (FR)</option>
+                    <option value="German">Deutsch (DE)</option>
+                    <option value="Hindi">हिन्दी (IN)</option>
+                  </select>
+                </div>
+
+                {/* 5. Time Zone */}
+                <div className="form-group-cell">
+                  <label className="form-label">Time Zone Scope</label>
+                  <select
+                    value={extraPreferences.timeZone}
+                    onChange={(e) => handleExtraPreferenceChange('timeZone', e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="UTC+05:30 (India Standard Time)">Asia/Kolkata (IST)</option>
+                    <option value="UTC+00:00 (Greenwich Mean Time)">GMT / UTC Zone</option>
+                    <option value="UTC-05:00 (Eastern Standard Time)">US/Eastern (EST)</option>
+                    <option value="UTC+09:00 (Japan Standard Time)">Asia/Tokyo (JST)</option>
+                  </select>
+                </div>
+
+                {/* 6. Distance Unit */}
+                <div className="form-group-cell">
+                  <label className="form-label">Distance Units</label>
+                  <select
+                    value={extraPreferences.distanceUnit}
+                    onChange={(e) => handleExtraPreferenceChange('distanceUnit', e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="Kilometers (km)">Kilometers (km)</option>
+                    <option value="Miles (mi)">Miles (mi)</option>
+                    <option value="Meters (m)">Meters (m)</option>
+                  </select>
+                </div>
+
+                {/* 7. Measurement system */}
+                <div className="form-group-cell">
+                  <label className="form-label">Measurement Standard</label>
+                  <select
+                    value={extraPreferences.measurementSystem}
+                    onChange={(e) => handleExtraPreferenceChange('measurementSystem', e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="Metric (SI)">Metric System (SI)</option>
+                    <option value="Imperial">Imperial Standard</option>
+                  </select>
+                </div>
+
+                {/* 8. Autosave Interval */}
+                <div className="form-group-cell">
+                  <label className="form-label">Autosave Interval</label>
+                  <select
+                    value={extraPreferences.autosaveInterval}
+                    onChange={(e) => handleExtraPreferenceChange('autosaveInterval', e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="5 minutes">Every 5 Mins</option>
+                    <option value="15 minutes">Every 15 Mins</option>
+                    <option value="30 minutes">Every 30 Mins</option>
+                    <option value="Never">Disabled / Manual</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* SECTION 6: APPEARANCE */}
+          <section id="appearance" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(59,130,246,0.1)', color: '#3B82F6' }}>
+                <Palette size={18} />
+              </span>
+              <h2 className="medium-section-title">Theme & Appearance</h2>
+            </header>
+
+            <div className="settings-card__body">
+              <div className="appearance-details-layout">
+                {/* Theme presets selector */}
+                <div className="theme-selectors-row">
+                  <span className="form-label" style={{ gridColumn: '1 / -1' }}>Theme Mode Selection</span>
+
+                  <button
+                    className={`theme-selector-btn ${appearance.darkTheme ? 'active' : ''}`}
+                    onClick={() => handleAppearanceToggle('darkTheme')}
+                  >
+                    <Moon size={16} />
+                    <span>Dark Theme</span>
+                  </button>
+
+                  <button
+                    className={`theme-selector-btn ${!appearance.darkTheme ? 'active' : ''}`}
+                    onClick={() => handleAppearanceToggle('darkTheme')}
+                  >
+                    <ToggleLeft size={16} />
+                    <span>Light Theme</span>
+                  </button>
+                </div>
+
+                {/* Accent and radius grids */}
+                <div className="appearance-tweaks-grid">
+                  <div className="form-group-cell">
+                    <label className="form-label">Primary Color Accent</label>
+                    <select
+                      value={extraAppearance.primaryAccent}
+                      onChange={(e) => handleExtraAppearanceChange('primaryAccent', e.target.value)}
+                      className="form-select"
+                    >
+                      <option value="#3B82F6">Royal Indigo (#3B82F6)</option>
+                      <option value="#10B981">Forest Emerald (#10B981)</option>
+                      <option value="#F59E0B">Amber Gold (#F59E0B)</option>
+                      <option value="#EF4444">Scarlet Crimson (#EF4444)</option>
+                      <option value="#8B5CF6">Deep Purple (#8B5CF6)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group-cell">
+                    <label className="form-label">Interface Card Corner Radius</label>
+                    <select
+                      value={extraAppearance.cardRadius}
+                      onChange={(e) => handleExtraAppearanceChange('cardRadius', e.target.value)}
+                      className="form-select"
+                    >
+                      <option value="20px">Rounded Enterprise (20px)</option>
+                      <option value="14px">Medium Classic (14px)</option>
+                      <option value="8px">Sharp Technical (8px)</option>
+                      <option value="0px">Flat Flat (0px)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group-cell">
+                    <label className="form-label">Font Scale Density</label>
+                    <select
+                      value={appearance.fontSize}
+                      onChange={handleFontSizeChange}
+                      className="form-select"
+                    >
+                      <option value="small">Compact (14px)</option>
+                      <option value="medium">Standard (16px)</option>
+                      <option value="large">Spacious (18px)</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group-cell">
+                    <label className="form-label">Micro-Animations</label>
+                    <select
+                      value={extraAppearance.animations ? 'true' : 'false'}
+                      onChange={(e) => handleExtraAppearanceChange('animations', e.target.value === 'true')}
+                      className="form-select"
+                    >
+                      <option value="true">Enabled (Smooth transitions)</option>
+                      <option value="false">Disabled (Reduce CPU power)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Appearance Live preview card */}
+                <div className="appearance-preview-card" style={{ borderRadius: extraAppearance.cardRadius }}>
+                  <div className="preview-top-accent" style={{ backgroundColor: extraAppearance.primaryAccent }} />
+                  <span className="font-semibold">Live System Theme Mockup</span>
+                  <p>Settings card border-radius is synced to visual radius preset.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 7: SYSTEM STATUS */}
+          <section id="status" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
+                <Server size={18} />
+              </span>
+              <h2 className="medium-section-title">System Engine Health</h2>
+            </header>
+
+            <div className="settings-card__body">
+              <div className="system-health-grid">
+                {[
+                  { name: 'Core Backend API', status: systemInfo.backendStatus, desc: 'FastAPI Operations gateway layer', icon: <Server size={16} /> },
+                  { name: 'Platform Database', status: systemInfo.databaseStatus, desc: 'PostgreSQL Relational distress catalog', icon: <Database size={16} /> },
+                  { name: 'YOLOv11 Detection Core', status: 'Online', desc: 'Neural network distress tagging GPU stream', icon: <Cpu size={16} /> },
+                  { name: 'File Storage Service', status: 'Online', desc: 'AWS S3 surveillance video vault', icon: <Info size={16} /> },
+                  { name: 'NVIDIA CUDA GPU Node', status: 'Online', desc: 'NVIDIA TensorRT execution hardware', icon: <Cpu size={16} /> },
+                  { name: 'Inference Queue Gateway', status: 'Warning', desc: 'Pipeline jobs dispatcher queue thread', icon: <AlertTriangle size={16} />, warn: true }
+                ].map((srv, idx) => (
+                  <div key={idx} className="health-node-card">
+                    <div className="health-node-header">
+                      <div className="health-node-logo">
+                        {srv.icon}
+                      </div>
+                      <span className={`health-status-badge ${srv.warn ? 'warning' : srv.status.toLowerCase() === 'online' ? 'online' : 'offline'}`}>
+                        {srv.warn ? 'Warning' : srv.status}
+                      </span>
+                    </div>
+                    <span className="health-node-name font-semibold">{srv.name}</span>
+                    <span className="health-node-desc">{srv.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 8: ABOUT SYSTEM */}
+          <section id="about" className="settings-card premium-card">
+            <header className="settings-card__header">
+              <span className="settings-card__icon" style={{ backgroundColor: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
+                <Cpu size={18} />
+              </span>
+              <h2 className="medium-section-title">About RoadVision AI</h2>
+            </header>
+
+            <div className="settings-card__body">
+              <div className="about-details-layout">
+                {/* Meta details list */}
+                <div className="about-info-grid">
+                  <div className="about-field">
+                    <span className="lbl">Core Framework Version</span>
+                    <span className="val font-mono">{systemInfo.version}</span>
+                  </div>
+                  <div className="about-field">
+                    <span className="lbl">Build Tag Number</span>
+                    <span className="val font-mono">{systemInfo.buildDate}</span>
+                  </div>
+                  <div className="about-field">
+                    <span className="lbl">YOLO Model weight Tag</span>
+                    <span className="val font-mono">{systemInfo.yoloModel}</span>
+                  </div>
+                  <div className="about-field">
+                    <span className="lbl">Database driver index</span>
+                    <span className="val font-mono">v4.2.1-psycopg2</span>
+                  </div>
+                  <div className="about-field">
+                    <span className="lbl">Platform License</span>
+                    <span className="val">MIT Enterprise Agreement</span>
+                  </div>
+                  <div className="about-field">
+                    <span className="lbl">Lead Developer team</span>
+                    <span className="val">Google DeepMind - advanced agents</span>
+                  </div>
+                </div>
+
+                {/* External links panel */}
+                <div className="about-links-grid">
+                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="about-link-box">
+                    <Github size={18} />
+                    <div>
+                      <span className="link-title font-semibold">GitHub Source Repository</span>
+                      <span className="link-url">github.com/roadvision-ai</span>
+                    </div>
+                    <ArrowUpRight size={14} className="link-arrow" />
+                  </a>
+
+                  <a href="https://docs.example.com" target="_blank" rel="noopener noreferrer" className="about-link-box">
+                    <BookOpen size={18} />
+                    <div>
+                      <span className="link-title font-semibold">API Documentation Manual</span>
+                      <span className="link-url">docs.roadvision-ai.org</span>
+                    </div>
+                    <ArrowUpRight size={14} className="link-arrow" />
+                  </a>
+
+                  <a href="https://support.example.com" target="_blank" rel="noopener noreferrer" className="about-link-box">
+                    <HelpCircle size={18} />
+                    <div>
+                      <span className="link-title font-semibold">Developer Technical Helpdesk</span>
+                      <span className="link-url">support.roadvision-ai.com</span>
+                    </div>
+                    <ArrowUpRight size={14} className="link-arrow" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
       </div>
+
+      {/* 4. Sticky Bottom Action Bar */}
+      <footer className="settings-sticky-bottom-bar">
+        <div className="bottom-bar-left">
+          <span className="bottom-bar-title font-semibold">Platform Configuration</span>
+          <p className="bottom-bar-subtitle">Save or export settings parameters globally.</p>
+        </div>
+        <div className="bottom-bar-actions">
+          <button className="settings-btn settings-btn--danger-text" onClick={handleResetSettings}>
+            Reset Changes
+          </button>
+          <button className="settings-btn settings-btn--secondary" onClick={handleExportConfig}>
+            Export Configuration
+          </button>
+          <button className="settings-btn settings-btn--secondary" onClick={() => alert('Changes cancelled.')}>
+            Cancel
+          </button>
+          <button className="settings-btn settings-btn--primary" onClick={handleSaveChanges}>
+            Save Changes
+          </button>
+        </div>
+      </footer>
+
     </div>
   );
 }

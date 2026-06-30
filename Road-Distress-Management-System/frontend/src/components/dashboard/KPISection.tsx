@@ -92,13 +92,7 @@ export default function KPISection({
 
   return (
     <section>
-      <div
-        style={{
-          display: 'grid',
-          gap: '24px',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        }}
-      >
+      <div className="dash-row-inner">
         {kpiItems.map((item) => (
           <KPICard 
             key={item.title} 
@@ -115,3 +109,4 @@ export default function KPISection({
     </section>
   )
 }
+

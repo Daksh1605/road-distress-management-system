@@ -1,15 +1,19 @@
 .top-navbar {
-  height: 64px;
-  background: var(--primary-bg); /* Blend with the warm page background */
+  height: 76px;
+  background: rgba(248, 248, 245, 0.8); /* Blend with glass effect */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--card-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 32px;
   box-sizing: border-box;
   flex-shrink: 0;
   z-index: 99;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
+
 
 /* Left: Large Rounded Search input */
 .top-navbar__left {
@@ -33,7 +37,7 @@
   border-radius: 9999px;
   background: var(--card-bg); /* Pure white rounded card style */
   border: 1px solid var(--card-border);
-  padding: 8px 16px 8px 38px;
+  padding: 8px 48px 8px 38px; /* Extra padding right for shortcut */
   font-size: 13px;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
@@ -41,8 +45,22 @@
 
 .top-navbar__search-input:focus {
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
+
+.search-shortcut {
+  position: absolute;
+  right: 14px;
+  font-size: 10px;
+  background: var(--primary-bg);
+  border: 1px solid var(--card-border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--secondary-text);
+  font-weight: 600;
+  pointer-events: none;
+}
+
 
 .top-navbar__search-icon {
   position: absolute;

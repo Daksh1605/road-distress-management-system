@@ -1,40 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  /* Master Color Palette - Warm light theme */
-  --primary-bg: #F7F6F3; /* Soft warm off-white background */
-  --card-bg: #FFFFFF;    /* Pure white card backgrounds */
-  --card-border: #E8E7E5; /* Extremely soft warm border tint */
+  /* Master Color Palette - Light enterprise theme */
+  --primary-bg: #F8F8F5; /* Background */
+  --card-bg: #FFFFFF;    /* Cards */
+  --card-border: #E7E7E5; /* Borders */
   
-  /* Sidebar Variables - Dark Charcoal (Tesla Fleet style) */
-  --sidebar-bg: #1F2328;
-  --sidebar-selected: #383F46;
-  --sidebar-hover: #2E343A;
-  --sidebar-text: #F2F2F2;
-  --sidebar-text-secondary: #AEB6BF;
+  /* Sidebar Variables - Pure White Theme */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-selected: #F3F4F6;
+  --sidebar-hover: #F9FAFB;
+  --sidebar-text: #1F2937;
+  --sidebar-text-secondary: #4B5563;
   
-  --primary-text: #1B1F23;
-  --secondary-text: #60666D;
+  --primary-text: #1F2937;
+  --secondary-text: #6B7280;
   
-  --accent-blue: #4F8EF7;
-  --accent-blue-hover: #3b7ce2;
-  --accent-blue-light: rgba(79, 142, 247, 0.08);
+  --accent-blue: #3B82F6; /* Info */
+  --accent-blue-hover: #2563EB;
+  --accent-blue-light: rgba(59, 130, 246, 0.08);
   
-  --success: #43A047;
-  --success-light: rgba(67, 160, 71, 0.08);
+  --success: #4CAF50;
+  --success-light: rgba(76, 175, 80, 0.08);
   
   --warning: #F59E0B;
   --warning-light: rgba(245, 158, 11, 0.08);
   
-  --danger: #EF5350;
-  --danger-light: rgba(239, 83, 80, 0.08);
+  --danger: #EF4444;
+  --danger-light: rgba(239, 68, 68, 0.08);
+  
+  --info: #3B82F6;
   
   /* Proportions, Shadows and Radii */
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.04); /* Soft warm shadows */
+  --shadow: 0 8px 30px rgba(0,0,0,.04);
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.06);
   
-  --radius-lg: 22px; /* Standard Card radius */
+  --radius-lg: 20px; /* Cards */
   --radius-md: 14px; /* Buttons and inputs */
   --radius-sm: 8px;  /* Small badges/thumbnails */
   
@@ -46,6 +48,7 @@
   --transition-normal: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 
 * {
   box-sizing: border-box;
@@ -62,6 +65,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   overflow-x: hidden;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 #root {
@@ -100,16 +105,16 @@ h1, h2, h3, h4, h5, h6 {
 .bold-page-title {
   font-family: var(--font-sans);
   font-weight: 700;
-  font-size: 28px;
+  font-size: 48px;
   color: var(--primary-text);
   letter-spacing: -0.025em;
-  line-height: 1.25;
+  line-height: 1.15;
 }
 
 .medium-section-title {
   font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 15px;
+  font-size: 26px;
   color: var(--primary-text);
   letter-spacing: -0.01em;
 }
@@ -117,15 +122,15 @@ h1, h2, h3, h4, h5, h6 {
 .light-secondary-text {
   font-family: var(--font-sans);
   font-weight: 400;
-  font-size: 13px;
+  font-size: 16px;
   color: var(--secondary-text);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .large-kpi-number {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 26px;
+  font-size: 42px;
   letter-spacing: -0.03em;
   color: var(--primary-text);
 }
@@ -133,16 +138,16 @@ h1, h2, h3, h4, h5, h6 {
 .small-caption {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 10px;
+  font-size: 13px;
   color: var(--secondary-text);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 
 /* Elements presets */
 input, select, textarea {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 16px;
   color: var(--primary-text);
   background-color: var(--primary-bg);
   border: 1px solid var(--card-border);
@@ -154,22 +159,27 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.12);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
   background-color: var(--card-bg);
 }
 
 button {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   border: none;
   outline: none;
-  transition: all var(--transition-fast);
+  transition: all 220ms ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  border-radius: var(--radius-md);
+}
+
+button:hover {
+  transform: scale(1.02);
 }
 
 /* Reusable premium Card container style */
@@ -178,12 +188,13 @@ button {
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: 20px;
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  padding: 22px;
+  transition: transform 220ms ease, box-shadow 220ms ease;
 }
 
 .premium-card:hover {
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
 }
 
 /* Fade animation preset */
@@ -198,8 +209,8 @@ button {
 
 /* Standard styling elements */
 .status-pill {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   text-transform: uppercase;
   padding: 3px 8px;
   border-radius: 9999px;
@@ -209,9 +220,10 @@ button {
 }
 
 .status-badge {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   text-transform: uppercase;
   padding: 2px 6px;
   border-radius: var(--radius-sm);
 }
+

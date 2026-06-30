@@ -171,7 +171,7 @@ const MOCK_DISTRESS_DB: RoadDistress[] = [
   {
     id: 'DIS-DL-0402',
     roadId: 'RD-DL-04',
-    roadName: 'NH-4',
+    roadName: 'Ring Road',
     location: 'Ring Road, AIIMS flyover underpass',
     state: 'Delhi',
     district: 'South Delhi',
@@ -191,7 +191,7 @@ const MOCK_DISTRESS_DB: RoadDistress[] = [
   {
     id: 'DIS-DL-0406',
     roadId: 'RD-DL-04',
-    roadName: 'NH-4',
+    roadName: 'Ring Road',
     location: 'Connaught Place Outer Circle, Block G road',
     state: 'Delhi',
     district: 'New Delhi',
@@ -363,13 +363,11 @@ export default function GISMap() {
   };
 
   const handleApplyFilters = (newFilters: GISFiltersState) => {
-    // Set loading to simulate database fetch
     setIsLoading(true);
     setTimeout(() => {
       setAppliedFilters(newFilters);
       setIsLoading(false);
 
-      // If the currently selected distress is filtered out, clear it
       if (selectedDistress) {
         const isStillVisible = MOCK_DISTRESS_DB.filter((distress) => {
           if (newFilters.state && distress.state !== newFilters.state) return false;
@@ -397,17 +395,61 @@ export default function GISMap() {
     }, 600);
   };
 
+  // Dynamically calculate averages based on applied filter list
+  const roadsCoveredCount = useMemo(() => {
+    return Array.from(new Set(filteredDistresses.map(d => d.roadId))).length;
+  }, [filteredDistresses]);
+
+  const avgConfidenceVal = useMemo(() => {
+    if (filteredDistresses.length === 0) return 0;
+    const sum = filteredDistresses.reduce((acc, curr) => acc + curr.confidence, 0);
+    return Math.round(sum / filteredDistresses.length);
+  }, [filteredDistresses]);
+
   return (
-    <div className="gis-page">
-      <header className="gis-page__header">
-        <h1 className="gis-page__title">GIS Map Layout</h1>
-        <p className="gis-page__subtitle">
-          Monitor road conditions, localize geo-spatial distress pins, and manage maintenance work orders.
-        </p>
+    <div className="gis-page animate-fade-in" aria-label="Road Distress GIS Intelligence">
+      <header className="gis-page__header" style={{ marginBottom: '4px' }}>
+        <h1 className="bold-page-title" style={{ fontSize: '32px' }}>Road Distress GIS Intelligence</h1>
+        <p className="light-secondary-text" style={{ fontSize: '14px' }}>Live visualization, spatial overlays, and distress density tracking across routes.</p>
       </header>
 
+      {/* KPI Summary Row (6 Compact Cards) */}
+      <div className="gis-kpi-row">
+        <div className="gis-kpi-card">
+          <span className="gis-kpi-card__lbl">Total Distresses</span>
+          <span className="gis-kpi-card__val font-mono">{filteredDistresses.length}</span>
+        </div>
+        <div className="gis-kpi-card">
+          <span className="gis-kpi-card__lbl">Critical Alerts</span>
+          <span className="gis-kpi-card__val font-mono" style={{ color: 'var(--danger)' }}>
+            {filteredDistresses.filter(d => d.severity.toLowerCase() === 'critical').length}
+          </span>
+        </div>
+        <div className="gis-kpi-card">
+          <span className="gis-kpi-card__lbl">Roads Covered</span>
+          <span className="gis-kpi-card__val font-mono">{roadsCoveredCount}</span>
+        </div>
+        <div className="gis-kpi-card">
+          <span className="gis-kpi-card__lbl">Avg Confidence</span>
+          <span className="gis-kpi-card__val font-mono" style={{ color: 'var(--accent-blue)' }}>
+            {avgConfidenceVal > 0 ? `${avgConfidenceVal}%` : 'N/A'}
+          </span>
+        </div>
+        <div className="gis-kpi-card">
+          <span className="gis-kpi-card__lbl">AI Status</span>
+          <span className="gis-kpi-card__val" style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '16px' }}>
+            <span className="live-dot" style={{ display: 'inline-block', width: '8px', height: '8px' }} />
+            Active
+          </span>
+        </div>
+        <div className="gis-kpi-card">
+          <span className="gis-kpi-card__lbl">Synchronization</span>
+          <span className="gis-kpi-card__val" style={{ fontSize: '16px' }}>Just Now</span>
+        </div>
+      </div>
+
+      {/* Main Workspace: Sticky Sidebar Filters (Left) | Map Container (Right) */}
       <div className="gis-page__content">
-        {/* Left Sidebar Filter Section */}
         <aside className="gis-page__sidebar" aria-label="Filters Panel">
           <GISFilters
             initialFilters={appliedFilters}
@@ -416,9 +458,8 @@ export default function GISMap() {
           />
         </aside>
 
-        {/* Right Main Map & Grid Section */}
         <main className="gis-page__main">
-          {/* Map Container */}
+          {/* Map Section */}
           <section className="gis-page__map-wrapper">
             <GISMapContainer
               distresses={filteredDistresses}
@@ -428,14 +469,100 @@ export default function GISMap() {
             />
           </section>
 
-          {/* Metrics & Road Details Grid */}
+          {/* Bottom Information Section: Selected Details (Left) | Spatial Analytics (Right) */}
           <div className="gis-page__bottom-grid">
-            <section className="gis-page__summary-wrapper" aria-label="Summary Metrics">
-              <DistressSummary distresses={filteredDistresses} isLoading={isLoading} />
-            </section>
-            <section className="gis-page__details-wrapper" aria-label="Selected Distress Details">
+            <section className="gis-page__details-wrapper" aria-label="Selected Distress Details" style={{ background: 'transparent', border: 'none', padding: 0, boxShadow: 'none' }}>
               <RoadDetailsPanel selectedDistress={selectedDistress} isLoading={isLoading} />
             </section>
+            
+            <section className="gis-page__summary-wrapper" aria-label="Summary Metrics" style={{ background: 'transparent', border: 'none', padding: 0, boxShadow: 'none' }}>
+              <DistressSummary distresses={filteredDistresses} isLoading={isLoading} />
+            </section>
+          </div>
+
+          {/* Full Width Recent Detections Table */}
+          <div className="premium-card gis-history-table-card">
+            <div className="card-header-with-actions" style={{ paddingBottom: '16px', borderBottom: '1px solid var(--card-border)', marginBottom: '16px' }}>
+              <h2 className="medium-section-title" style={{ fontSize: '15px' }}>Spatial Distress Records Registry</h2>
+            </div>
+            
+            <div className="table-responsive">
+              <table className="enterprise-table">
+                <thead>
+                  <tr>
+                    <th>Thumbnail</th>
+                    <th>Road ID</th>
+                    <th>District</th>
+                    <th>Severity</th>
+                    <th>Confidence</th>
+                    <th>Detection Time</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDistresses.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', color: 'var(--secondary-text)' }}>No distress records match active filtering rules.</td>
+                    </tr>
+                  ) : (
+                    filteredDistresses.map((d) => (
+                      <tr key={d.id} style={{ cursor: 'pointer' }} onClick={() => handleSelectDistress(d)}>
+                        <td>
+                          <div className="table-thumbnail-wrapper">
+                            <img 
+                              src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=80" 
+                              alt="visual clip" 
+                              className="table-thumbnail" 
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <span className="font-mono font-bold">RD-{d.roadId.split('-').pop()}</span>
+                        </td>
+                        <td>
+                          <span>{d.district}</span>
+                        </td>
+                        <td>
+                          <span className={`status-pill badge-${d.severity.toLowerCase()}`}>
+                            {d.severity.toUpperCase()}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="font-mono font-bold" style={{ color: 'var(--accent-blue)' }}>{d.confidence}%</span>
+                        </td>
+                        <td>
+                          <span>{new Date(d.reportedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </td>
+                        <td>
+                          <span className={`status-pill status-pill--${d.maintenanceStatus.toLowerCase()}`} style={{ textTransform: 'capitalize', fontWeight: 600 }}>
+                            {d.maintenanceStatus.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }} onClick={(e) => e.stopPropagation()}>
+                          <div className="table-actions" style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                            <button 
+                              className="btn-report-run font-semibold"
+                              style={{ fontSize: '12px', padding: '4px 10px' }}
+                              onClick={() => alert(`Report generated successfully for ${d.id}`)}
+                            >
+                              Report
+                            </button>
+                            <button 
+                              className="btn-control"
+                              style={{ fontSize: '12px', padding: '4px 10px' }}
+                              onClick={() => handleSelectDistress(d)}
+                            >
+                              Details
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </main>
       </div>

@@ -1,13 +1,4 @@
-import {
-  Milestone,
-  Compass,
-  Zap,
-  Clock,
-  Coins,
-  FileText,
-  UserCheck,
-  CalendarDays,
-} from 'lucide-react';
+import { Milestone, Compass, FileText, ExternalLink } from 'lucide-react';
 import type { RoadDistress } from '../../types/gis';
 import './RoadDetailsPanel.css';
 
@@ -20,84 +11,29 @@ export default function RoadDetailsPanel({
   selectedDistress,
   isLoading = false,
 }: RoadDetailsPanelProps) {
-  const getSeverityBadgeClass = (severity: string) => {
-    return `gis-details__badge gis-details__badge--severity-${severity}`;
-  };
 
-  const getStatusBadgeClass = (status: string) => {
-    return `gis-details__badge gis-details__badge--status-${status}`;
+  const getSeverityBadgeClass = (severity: string) => {
+    return `status-pill badge-${severity.toLowerCase()}`;
   };
 
   const formatDistressType = (type: string) => {
     return type.replace('_', ' ').charAt(0).toUpperCase() + type.replace('_', ' ').slice(1);
   };
 
-  // Map database maintenanceStatus to requested Repair Status Badges
-  const getRepairStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'scheduled':
-        return 'Assigned';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      default:
-        return 'Pending';
-    }
+  // Google Maps helper
+  const handleOpenGoogleMaps = (lat: number, lng: number) => {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
   };
 
-  const getRepairStatusClass = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'pending';
-      case 'scheduled':
-        return 'assigned';
-      case 'in_progress':
-        return 'in-progress';
-      case 'completed':
-        return 'completed';
-      default:
-        return 'pending';
-    }
-  };
-
-  // Render loading skeleton
   if (isLoading) {
     return (
       <article className="gis-details gis-details--loading" aria-label="Loading details">
-        <header className="gis-details__header">
-          <div className="gis-details__skeleton-header-icon shimmer" />
-          <div className="gis-details__skeleton-title shimmer" />
-        </header>
-
-        <div className="gis-details__body">
-          {/* Stats grid skeletons */}
-          <div className="gis-details__stats-grid">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="gis-details__skeleton-stat-card shimmer" />
-            ))}
-          </div>
-
-          {/* Details list skeletons */}
-          <div className="gis-details__meta-section">
-            <div className="gis-details__meta-grid">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-                <div key={i} className="gis-details__skeleton-meta-item">
-                  <div className="gis-details__skeleton-meta-lbl shimmer" />
-                  <div className="gis-details__skeleton-meta-val shimmer" />
-                </div>
-              ))}
-            </div>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px' }}>
+          <div className="gis-details__skeleton-title shimmer" style={{ height: '24px', width: '60%' }} />
+          <div className="gis-details__skeleton-stat-card shimmer" style={{ height: '140px', borderRadius: '12px' }} />
+          <div className="gis-details__skeleton-meta-item shimmer" style={{ height: '16px', width: '80%' }} />
+          <div className="gis-details__skeleton-meta-item shimmer" style={{ height: '16px', width: '40%' }} />
         </div>
-
-        <footer className="gis-details__actions">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="gis-details__skeleton-btn shimmer" />
-          ))}
-        </footer>
       </article>
     );
   }
@@ -118,13 +54,17 @@ export default function RoadDetailsPanel({
     );
   }
 
+  const recommendationText = selectedDistress.distressType === 'pothole'
+    ? 'Pothole asphalt sealing & compaction'
+    : 'Crack expansion joint injection filling';
+
   return (
     <article className="gis-details" aria-labelledby="details-title">
-      <header className="gis-details__header">
-        <div className="gis-details__header-title-group">
-          <Milestone className="gis-details__header-icon" size={20} />
-          <h3 id="details-title" className="gis-details__title">
-            Selected Road Distress
+      <header className="gis-details__header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--card-border)', paddingBottom: '12px', marginBottom: '14px' }}>
+        <div className="gis-details__header-title-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Milestone className="gis-details__header-icon" size={18} style={{ color: 'var(--accent-blue)' }} />
+          <h3 id="details-title" className="gis-details__title" style={{ fontSize: '15px', fontWeight: 600, color: 'var(--primary-text)' }}>
+            Selected Distress Details
           </h3>
         </div>
         <span className={getSeverityBadgeClass(selectedDistress.severity)}>
@@ -132,158 +72,77 @@ export default function RoadDetailsPanel({
         </span>
       </header>
 
-      <div className="gis-details__body">
-        {/* Quick Statistics Grid */}
-        <section className="gis-details__stats-grid" aria-label="Quick Statistics">
-          <div className="gis-details__stat-card">
-            <div className="gis-details__stat-header">
-              <Coins size={14} className="gis-details__stat-icon text-amber" />
-              <span className="gis-details__stat-lbl">Estimated Cost</span>
-            </div>
-            <span className="gis-details__stat-val">{selectedDistress.estimatedRepairCost}</span>
+      <div className="gis-details__body-grid" style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '16px', marginBottom: '16px' }}>
+        {/* Left Side Thumbnail */}
+        <div className="gis-details-thumb-wrapper" style={{ height: '100px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--card-border)', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img 
+            src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=150" 
+            alt="defect visual clip" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </div>
+
+        {/* Right Side Key Metadata info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--secondary-text)', fontWeight: 500 }}>Road ID</span>
+            <span className="font-mono font-bold">{selectedDistress.roadId}</span>
           </div>
-
-          <div className="gis-details__stat-card">
-            <div className="gis-details__stat-header">
-              <Clock size={14} className="gis-details__stat-icon text-blue" />
-              <span className="gis-details__stat-lbl">Repair Duration</span>
-            </div>
-            <span className="gis-details__stat-val">{selectedDistress.estimatedRepairTime}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--secondary-text)', fontWeight: 500 }}>GPS Coordinates</span>
+            <span className="font-mono font-semibold" style={{ fontSize: '12px' }}>
+              {selectedDistress.coordinates[0].toFixed(4)}° N, {selectedDistress.coordinates[1].toFixed(4)}° E
+            </span>
           </div>
-
-          <div className="gis-details__stat-card">
-            <div className="gis-details__stat-header">
-              <Zap size={14} className="gis-details__stat-icon text-violet" />
-              <span className="gis-details__stat-lbl">Priority Score</span>
-            </div>
-            <span className="gis-details__stat-val">{selectedDistress.priorityScore}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--secondary-text)', fontWeight: 500 }}>Confidence</span>
+            <span className="font-mono font-bold" style={{ color: 'var(--accent-blue)' }}>{selectedDistress.confidence}%</span>
           </div>
-        </section>
-
-        {/* Detailed Metadata Grid */}
-        <section className="gis-details__meta-section" aria-label="Distress Parameters">
-          <div className="gis-details__meta-grid">
-            {/* Distress ID */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Distress ID</span>
-              <span className="gis-details__meta-val font-mono">{selectedDistress.id}</span>
-            </div>
-
-            {/* Road ID */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Road ID</span>
-              <span className="gis-details__meta-val font-mono">{selectedDistress.roadId}</span>
-            </div>
-
-            {/* Road Name */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Road Name</span>
-              <span className="gis-details__meta-val">{selectedDistress.roadName}</span>
-            </div>
-
-            {/* State */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">State</span>
-              <span className="gis-details__meta-val">{selectedDistress.state}</span>
-            </div>
-
-            {/* District */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">District</span>
-              <span className="gis-details__meta-val">{selectedDistress.district}</span>
-            </div>
-
-            {/* Coordinates */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Latitude</span>
-              <span className="gis-details__meta-val font-mono">
-                {selectedDistress.coordinates[0].toFixed(4)}° N
-              </span>
-            </div>
-
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Longitude</span>
-              <span className="gis-details__meta-val font-mono">
-                {selectedDistress.coordinates[1].toFixed(4)}° E
-              </span>
-            </div>
-
-            {/* Distress Type */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Distress Type</span>
-              <span className="gis-details__meta-val">
-                {formatDistressType(selectedDistress.distressType)}
-              </span>
-            </div>
-
-            {/* Confidence Score */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Confidence Score</span>
-              <span className="gis-details__meta-val highlight-violet">
-                {selectedDistress.confidence}%
-              </span>
-            </div>
-
-            {/* Dates */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Detection Date</span>
-              <span className="gis-details__meta-val">
-                {new Date(selectedDistress.detectionDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Last Updated</span>
-              <span className="gis-details__meta-val">
-                {new Date(selectedDistress.lastInspectionDate).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-
-            {/* Assigned Team */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Assigned Team</span>
-              <span className="gis-details__meta-val">
-                {selectedDistress.assignedTeam === 'Not Assigned' ? (
-                  <span className="text-muted italic">{selectedDistress.assignedTeam}</span>
-                ) : (
-                  <span>{selectedDistress.assignedTeam}</span>
-                )}
-              </span>
-            </div>
-
-            {/* Repair Status */}
-            <div className="gis-details__meta-item">
-              <span className="gis-details__meta-lbl">Repair Status</span>
-              <span className="gis-details__meta-val">
-                <span className={getStatusBadgeClass(getRepairStatusClass(selectedDistress.maintenanceStatus))}>
-                  {getRepairStatusLabel(selectedDistress.maintenanceStatus)}
-                </span>
-              </span>
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--secondary-text)', fontWeight: 500 }}>Detection Time</span>
+            <span>
+              {new Date(selectedDistress.detectionDate).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+            </span>
           </div>
-        </section>
+        </div>
       </div>
 
-      <footer className="gis-details__actions">
-        <button className="gis-details__btn-action gis-details__btn-action--secondary" type="button">
-          <FileText size={14} />
-          <span>View Full Report</span>
+      {/* AI Recommendation & cost summaries */}
+      <div style={{ background: 'var(--primary-bg)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px', fontSize: '13px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: 'var(--secondary-text)', fontWeight: 500 }}>AI Recommendation</span>
+          <span className="font-semibold text-capitalize" style={{ color: 'var(--primary-text)' }}>{formatDistressType(selectedDistress.distressType)} Repair</span>
+        </div>
+        <div style={{ fontSize: '12px', color: 'var(--secondary-text)', fontStyle: 'italic', borderLeft: '2px solid var(--accent-blue)', paddingLeft: '8px' }}>
+          {recommendationText}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--card-border)', paddingTop: '8px', marginTop: '4px' }}>
+          <span style={{ color: 'var(--secondary-text)', fontWeight: 500 }}>Est. Repair Cost</span>
+          <span className="font-mono font-bold" style={{ fontSize: '14px' }}>{selectedDistress.estimatedRepairCost}</span>
+        </div>
+      </div>
+
+      {/* Bottom Actions Row */}
+      <footer className="gis-details__actions" style={{ display: 'flex', gap: '8px' }}>
+        <button 
+          className="btn-control" 
+          style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', justifyContent: 'center', background: 'var(--primary-bg)' }}
+          onClick={() => alert("Report generated successfully.")}
+        >
+          <FileText size={13} />
+          <span>Generate Report</span>
         </button>
-        <button className="gis-details__btn-action gis-details__btn-action--outline" type="button">
-          <UserCheck size={14} />
-          <span>Assign Team</span>
-        </button>
-        <button className="gis-details__btn-action gis-details__btn-action--primary" type="button">
-          <CalendarDays size={14} />
-          <span>Schedule Repair</span>
+        <button 
+          className="btn-control btn-control--capture" 
+          style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', justifyContent: 'center', background: 'var(--primary-text)', color: '#FFF' }}
+          onClick={() => handleOpenGoogleMaps(selectedDistress.coordinates[0], selectedDistress.coordinates[1])}
+        >
+          <ExternalLink size={13} />
+          <span>Open in Google Maps</span>
         </button>
       </footer>
     </article>

@@ -1,7 +1,7 @@
 .gis-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px; /* Section spacing 28px */
 }
 
 .gis-page__header {
@@ -10,10 +10,61 @@
   gap: 4px;
 }
 
+/* KPI Summary Row (6 columns) */
+.gis-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 24px; /* Card gap 24px */
+}
+
+@media (max-width: 1400px) {
+  .gis-kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .gis-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.gis-kpi-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.gis-kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.gis-kpi-card__lbl {
+  font-size: 11px;
+  color: var(--secondary-text);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gis-kpi-card__val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+/* Main Workspace split: Sidebar & Map */
 .gis-page__content {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 16px;
+  grid-template-columns: 320px 1fr;
+  gap: 24px; /* Card gap 24px */
   align-items: start;
 }
 
@@ -24,34 +75,33 @@
 }
 
 .gis-page__sidebar {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 20px;
+  position: sticky;
+  top: 100px;
+  z-index: 10;
 }
 
 .gis-page__main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .gis-page__map-wrapper {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
+/* Bottom Grid layout */
 .gis-page__bottom-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .gis-page__bottom-grid {
     grid-template-columns: 1fr;
   }
@@ -59,10 +109,10 @@
 
 .gis-page__summary-wrapper,
 .gis-page__details-wrapper {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 20px;
-  min-height: 200px;
+  min-height: 240px;
+}
+
+/* History table styles custom override */
+.gis-history-table-card {
+  padding: 22px;
 }
