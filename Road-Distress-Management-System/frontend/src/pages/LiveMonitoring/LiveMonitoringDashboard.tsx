@@ -13,7 +13,11 @@ import {
   Tv,
   Loader2,
   Trash2,
-  Video
+  Video,
+  RefreshCw,
+  Search,
+  Compass,
+  Cpu
 } from 'lucide-react';
 import './LiveMonitoringDashboard.css';
 import RealTimeDetectionFeed from '../../components/monitoring/RealTimeDetectionFeed';
@@ -319,108 +323,166 @@ export default function LiveMonitoringDashboard() {
   });
 
   return (
-    <div className="live-mon">
-      {/* Page Header */}
-      <header className="live-mon__header">
-        <div className="live-mon__header-titles">
-          <h1 className="live-mon__title">Live Monitoring Center</h1>
-          <p className="live-mon__subtitle">
-            Real-time road distress detection and surveillance
-          </p>
+    <div className="live-mon-center-page animate-fade-in">
+      
+      {/* 1. Page Header */}
+      <header className="live-mon-header">
+        <div className="live-mon-header__title-group">
+          <Tv size={28} className="live-mon-header__logo" />
+          <div>
+            <h1 className="bold-page-title">Live Monitoring Center</h1>
+            <p className="light-secondary-text">Real-time road distress detection and AI video stream diagnostics</p>
+          </div>
         </div>
-        <div className={`live-mon__status-pill ${isMonitoring ? 'live-mon__status-pill--active' : ''}`}>
-          <span className="live-mon__status-dot"></span>
-          <span>{isMonitoring ? 'FEED: ACTIVE' : videoFile ? 'FEED: READY' : 'FEED: IDLE'}</span>
+
+        {/* Header Actions */}
+        <div className="live-mon-header__toolbar">
+          <div className="live-mon-header__status-badge">
+            <span className={`status-badge-dot ${isMonitoring ? 'active' : ''}`} />
+            <span>{isMonitoring ? 'LIVE: ACTIVE' : videoFile ? 'FEED: READY' : 'FEED: IDLE'}</span>
+          </div>
+
+          <div className="camera-select-wrapper">
+            <select className="camera-selector-dropdown" value="CAM-04" onChange={() => alert('Switching camera feed... (Simulated)')}>
+              <option value="CAM-04">CAM-04 (NH-48 Corridor)</option>
+              <option value="CAM-01">CAM-01 (Western Express Highway)</option>
+              <option value="CAM-02">CAM-02 (SH-10 Khandala Ghats)</option>
+            </select>
+          </div>
+
+          <button className="header-action-btn" onClick={fetchVideos} title="Refresh Feeds Database">
+            <RefreshCw size={15} />
+          </button>
+
+          <button className="header-action-btn" onClick={toggleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+          </button>
         </div>
       </header>
 
-      {/* Row 1: Live Video Feed and Quick Stats */}
-      <div className="live-mon__grid-row live-mon__grid-row--feed-split">
-        {/* Live Video Feed Card */}
-        <section className={`live-mon-video-card ${isFullscreen ? 'live-mon-video-card--fullscreen' : ''}`} aria-label="Video surveillance feed">
-          <header className="live-mon-video-card__header">
-            <div className="live-mon-video-card__title-group">
-              <Tv size={16} className="text-purple" />
-              <h2 className="live-mon-video-card__title">
-                {videoFile ? `Surveillance Feed: ${videoFile}` : 'Surveillance Feed (Camera CAM-04)'}
+      {/* 2. Main 70/30 Grid */}
+      <div className="live-mon-main-grid">
+        
+        {/* Left Column (70%): Live Camera Feed Viewport */}
+        <section className={`live-camera-feed-card premium-card ${isFullscreen ? 'card-fullscreen' : ''}`}>
+          <header className="feed-card-header">
+            <div className="feed-card-title">
+              <Radio size={16} className={`feed-live-icon ${isMonitoring ? 'pulsing' : ''}`} />
+              <h2 className="medium-section-title">
+                {videoFile ? `Feed Stream: ${videoFile}` : 'Live Camera Feed - CAM-04'}
               </h2>
             </div>
-            <button 
-              className="live-mon-video-card__fullscreen-btn" 
-              onClick={toggleFullscreen} 
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>
+            <div className="feed-card-telemetry">
+              <span>Resolution: <strong>1920x1080</strong></span>
+              <span>FPS: <strong>{isMonitoring ? '30.0' : '0.0'}</strong></span>
+              <span>Recording: <strong>{isMonitoring ? 'Active' : 'Standby'}</strong></span>
+              <span>Latency: <strong>{isMonitoring ? '14ms' : '0ms'}</strong></span>
+            </div>
           </header>
 
-          <div className="live-mon-video-card__viewport">
-            {/* Background Simulated Road Video */}
-            <div className="live-mon-video-card__simulator-bg">
-              <div className="live-mon-video-card__road-perspective">
-                {/* Horizontal scan line */}
-                {isMonitoring && <div className="live-mon-video-card__scanner-line" />}
-                
-                {/* Bounding box detection overlay overlay */}
-                {isMonitoring && activeOverlay && (
-                  <div 
-                    className={`live-mon-video-card__bbox border-${activeOverlay.severity.toLowerCase()}`}
-                    style={{
-                      left: `${activeOverlay.x}%`,
-                      top: `${activeOverlay.y}%`,
-                      width: `${activeOverlay.w}px`,
-                      height: `${activeOverlay.h}px`
-                    }}
-                  >
-                    <span className={`live-mon-video-card__bbox-tag bg-${activeOverlay.severity.toLowerCase()}`}>
-                      {activeOverlay.type} ({activeOverlay.confidence}%)
-                    </span>
+          {/* Video Viewport viewport */}
+          <div className="feed-viewport-container">
+            <div className="live-mon-video-card__viewport">
+              {/* Perspective background simulated highway */}
+              <div className="live-mon-video-card__simulator-bg">
+                <div className="live-mon-video-card__road-perspective">
+                  
+                  {/* Scan line */}
+                  {isMonitoring && <div className="live-mon-video-card__scanner-line" />}
+
+                  {/* Active detection overlay */}
+                  {isMonitoring && activeOverlay && (
+                    <div 
+                      className={`live-mon-video-card__bbox border-${activeOverlay.severity.toLowerCase()}`}
+                      style={{
+                        left: `${activeOverlay.x}%`,
+                        top: `${activeOverlay.y}%`,
+                        width: `${activeOverlay.w}px`,
+                        height: `${activeOverlay.h}px`
+                      }}
+                    >
+                      <span className={`live-mon-video-card__bbox-tag bg-${activeOverlay.severity.toLowerCase()}`}>
+                        {activeOverlay.type} ({activeOverlay.confidence}%)
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Telemetry HUD Grid overlays */}
+                  <div className="live-mon-video-card__hud-grid" />
+
+                  {/* Telemetry HUD indicators */}
+                  <div className="live-mon-video-card__hud-overlay">
+                    <span className="font-mono text-purple">CAMERA: CAM-04 / NH-48</span>
+                    <span className="font-mono text-amber">GPS: 18.7342, 73.4211</span>
+                    <span className="font-mono text-blue">YOLO CORE STABLE</span>
                   </div>
-                )}
-                
-                {/* Simulated telemetry grids */}
-                <div className="live-mon-video-card__hud-grid" />
-                
-                {/* Simulated camera settings info */}
-                <div className="live-mon-video-card__hud-overlay">
-                  <span className="font-mono text-purple">CAM-04/NH48</span>
-                  <span className="font-mono text-amber">GPS: 18.734, 73.421</span>
-                  <span className="font-mono text-blue">YOLOv11x ACTIVE</span>
                 </div>
               </div>
+
+              {/* Offline Overlay HUD */}
+              {!isMonitoring && !videoFile && (
+                <div className="live-mon-video-card__empty-state">
+                  <Radio className="live-mon-video-card__empty-icon animate-pulse" size={48} />
+                  <h3>Surveillance Stream Offline</h3>
+                  <p>Load a recorded file or start live feed telemetry to begin distress scanning.</p>
+                </div>
+              )}
             </div>
 
-            {/* Empty view state when idle */}
-            {!isMonitoring && !videoFile && (
-              <div className="live-mon-video-card__empty-state">
-                <Radio className="live-mon-video-card__empty-icon animate-pulse" size={40} />
-                <p className="live-mon-video-card__empty-text">Camera stream is offline. Start monitoring to activate feed.</p>
+            {/* Bottom Overlay Telemetry HUD */}
+            {isMonitoring && (
+              <div className="viewport-overlay-telemetry">
+                <div className="telemetry-hud-box">
+                  <span className="hud-lbl">Current Detection</span>
+                  <span className="hud-val text-red font-semibold">
+                    {activeOverlay ? activeOverlay.type : 'None Flagged'}
+                  </span>
+                </div>
+                <div className="telemetry-hud-box">
+                  <span className="hud-lbl">GPS Coordinates</span>
+                  <span className="hud-val font-mono">18.7342, 73.4211</span>
+                </div>
+                <div className="telemetry-hud-box">
+                  <span className="hud-lbl">Frame Number</span>
+                  <span className="hud-val font-mono">{framesProcessed}</span>
+                </div>
+                <div className="telemetry-hud-box">
+                  <span className="hud-lbl">Inference Latency</span>
+                  <span className="hud-val font-mono text-purple">12.4 ms</span>
+                </div>
+                <div className="telemetry-hud-box">
+                  <span className="hud-lbl">Model Confidence</span>
+                  <span className="hud-val font-mono text-green">
+                    {activeOverlay ? `${activeOverlay.confidence}%` : '0%'}
+                  </span>
+                </div>
               </div>
             )}
           </div>
 
-          <footer className="live-mon-video-card__controls">
-            <div className="live-mon-video-card__button-group">
+          {/* Controls Footer */}
+          <footer className="feed-controls-footer">
+            <div className="controls-actions-group">
               <button 
-                className={`live-mon-btn live-mon-btn--success ${isMonitoring ? 'live-mon-btn--disabled' : ''}`}
+                className={`live-mon-btn start-monitoring-btn ${isMonitoring ? 'btn-disabled' : ''}`}
                 onClick={handleStart}
                 disabled={isMonitoring}
               >
-                <Play size={14} />
+                <Play size={15} />
                 <span>Start Monitoring</span>
               </button>
 
               <button 
-                className={`live-mon-btn live-mon-btn--danger ${!isMonitoring ? 'live-mon-btn--disabled' : ''}`}
+                className={`live-mon-btn stop-monitoring-btn ${!isMonitoring ? 'btn-disabled' : ''}`}
                 onClick={handleStop}
                 disabled={!isMonitoring}
               >
-                <Square size={14} />
+                <Square size={15} />
                 <span>Stop Monitoring</span>
               </button>
             </div>
 
-            <div className="live-mon-video-card__upload-group">
+            <div className="controls-upload-group">
               <input 
                 type="file" 
                 accept="video/*" 
@@ -428,241 +490,285 @@ export default function LiveMonitoringDashboard() {
                 onChange={handleFileChange} 
                 style={{ display: 'none' }} 
               />
-              <button className="live-mon-btn live-mon-btn--secondary" onClick={handleUploadClick}>
-                <Upload size={14} />
+              <button className="live-mon-btn upload-feed-btn" onClick={handleUploadClick}>
+                <Upload size={15} />
                 <span>Upload Video</span>
               </button>
-              {videoFile && <span className="live-mon-video-card__file-label font-mono">{videoFile}</span>}
+              {videoFile && (
+                <span className="loaded-filename font-mono" title={videoFile}>
+                  🎞️ {videoFile}
+                </span>
+              )}
             </div>
           </footer>
         </section>
 
-        {/* Quick Stats & Video Management tabbed container */}
-        <section className="live-mon-side-panel" aria-labelledby="side-panel-title">
-          <header className="live-mon-side-panel__tabs">
-            <button 
-              type="button"
-              className={`live-mon-side-panel__tab-btn ${rightTab === 'videos' ? 'live-mon-side-panel__tab-btn--active' : ''}`}
-              onClick={() => setRightTab('videos')}
-            >
-              <Video size={14} />
-              <span>Video Library</span>
-            </button>
-            <button 
-              type="button"
-              className={`live-mon-side-panel__tab-btn ${rightTab === 'stats' ? 'live-mon-side-panel__tab-btn--active' : ''}`}
-              onClick={() => setRightTab('stats')}
-            >
-              <Activity size={14} />
-              <span>Diagnostic Stats</span>
-            </button>
-          </header>
+        {/* Right Column (30%): Video Queue & Critical Alerts */}
+        <aside className="live-mon-sidebar-column">
+          
+          {/* Top Card: Video Queue */}
+          <article className="live-queue-card premium-card">
+            <header className="card-header-row">
+              <Video size={16} className="text-purple" />
+              <h3 className="medium-section-title" style={{ fontSize: '15px' }}>Surveillance Video Queue</h3>
+            </header>
 
-          <div className="live-mon-side-panel__content">
-            {rightTab === 'stats' ? (
-              <div className="live-mon-stats-card__body">
-                {/* Metric Frame */}
-                <div className="live-mon-stat-block">
-                  <span className="live-mon-stat-block__label">Frames Processed</span>
-                  <span className="live-mon-stat-block__value font-mono">{framesProcessed.toLocaleString()}</span>
-                </div>
-
-                {/* Metric Distresses */}
-                <div className="live-mon-stat-block">
-                  <span className="live-mon-stat-block__label">Anomalies Detected</span>
-                  <span className="live-mon-stat-block__value font-mono text-purple">{distressesCount}</span>
-                </div>
-
-                {/* Metric Alerts */}
-                <div className="live-mon-stat-block">
-                  <span className="live-mon-stat-block__label">Critical Alerts</span>
-                  <span className="live-mon-stat-block__value font-mono text-red">{criticalAlertsCount}</span>
-                </div>
-
-                {/* Metric Conf */}
-                <div className="live-mon-stat-block">
-                  <span className="live-mon-stat-block__label">Avg Confidence</span>
-                  <span className="live-mon-stat-block__value font-mono text-green">{avgConfidence}%</span>
-                </div>
+            <div className="queue-card-body">
+              {/* Drag and Drop area */}
+              <div 
+                className={`queue-upload-dropzone ${isDragging ? 'dragging' : ''} ${isUploading ? 'uploading' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleUploadClick}
+              >
+                {isUploading ? (
+                  <div className="upload-loading-view">
+                    <Loader2 className="animate-spin text-purple" size={28} />
+                    <span>Syncing file metadata...</span>
+                  </div>
+                ) : (
+                  <div className="upload-prompt-view">
+                    <Upload className="upload-icon" size={28} />
+                    <span className="upload-prompt-title">Drag video feed here</span>
+                    <span className="upload-prompt-desc">or click to browse local files</span>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="vms-panel">
-                {/* Drag and Drop Upload Area */}
-                <div 
-                  className={`vms-upload-dropzone ${isDragging ? 'vms-upload-dropzone--dragging' : ''} ${isUploading ? 'vms-upload-dropzone--uploading' : ''}`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={handleUploadClick}
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Upload video file"
-                >
-                  {isUploading ? (
-                    <div className="vms-upload-dropzone__loading">
-                      <Loader2 className="animate-spin text-purple" size={32} />
-                      <p>Uploading to backend...</p>
-                    </div>
-                  ) : (
-                    <div className="vms-upload-dropzone__prompt">
-                      <Upload className="vms-upload-dropzone__icon text-purple" size={32} />
-                      <p className="vms-upload-dropzone__text-main">Drag & drop video feed here</p>
-                      <p className="vms-upload-dropzone__text-sub">or click to browse (.mp4, .avi, .mov)</p>
-                    </div>
-                  )}
-                </div>
 
-                {uploadError && <p className="vms-panel__error-text font-mono">{uploadError}</p>}
+              {uploadError && <p className="upload-error-tag font-mono">{uploadError}</p>}
 
-                {/* Uploaded videos metadata list */}
-                <div className="vms-library">
-                  <h3 className="vms-library__title font-mono">Surveillance Feeds database</h3>
-                  {fetchError ? (
-                    <p className="vms-library__error font-mono">{fetchError}</p>
-                  ) : uploadedVideos.length === 0 ? (
-                    <div className="vms-library__empty">
-                      <Video size={20} className="text-slate-500" />
-                      <span>No videos found in PostgreSQL</span>
-                    </div>
-                  ) : (
-                    <div className="vms-library__list">
-                      {uploadedVideos.map((video) => {
-                        const isCurrent = videoFile === video.filename;
-                        const statusClass = `vms-status-badge--${video.processing_status}`;
-                        
-                        return (
-                          <div 
-                            key={video.id} 
-                            className={`vms-video-row ${isCurrent ? 'vms-video-row--active' : ''}`}
-                            onClick={() => handleSelectVideo(video)}
-                          >
-                            <div className="vms-video-row__info">
-                              <span className="vms-video-row__filename font-mono" title={video.filename}>
-                                {video.filename}
-                              </span>
-                              <span className="vms-video-row__date font-mono">
-                                {new Date(video.upload_timestamp).toLocaleString('en-IN', { hour12: false })}
-                              </span>
-                            </div>
-                            <div className="vms-video-row__actions">
-                              <span className={`vms-status-badge ${statusClass} font-mono`}>
-                                {video.processing_status === 'processing' && (
-                                  <Loader2 className="animate-spin" size={10} style={{ marginRight: '4px' }} />
-                                )}
-                                {video.processing_status}
-                              </span>
-                              <button 
-                                type="button"
-                                className="vms-video-row__delete-btn"
-                                onClick={(e) => handleDeleteVideo(video.id, e)}
-                                title="Delete video"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
+              {/* Videos list database */}
+              <div className="queue-video-list-container">
+                <span className="list-title font-mono">Surveillance Library Database</span>
+                {fetchError ? (
+                  <p className="fetch-error-tag font-mono">{fetchError}</p>
+                ) : uploadedVideos.length === 0 ? (
+                  <div className="empty-videos-queue">
+                    <Video size={18} style={{ opacity: 0.4 }} />
+                    <span>No uploads catalogued in database.</span>
+                  </div>
+                ) : (
+                  <div className="videos-queue-list">
+                    {uploadedVideos.map((video) => {
+                      const isCurrent = videoFile === video.filename;
+                      const statusClass = `status-${video.processing_status.toLowerCase()}`;
+                      
+                      return (
+                        <div 
+                          key={video.id} 
+                          className={`queue-video-row ${isCurrent ? 'active' : ''}`}
+                          onClick={() => handleSelectVideo(video)}
+                        >
+                          <div className="video-row-details">
+                            <span className="video-row-title font-mono" title={video.filename}>
+                              {video.filename}
+                            </span>
+                            <span className="video-row-meta font-mono">
+                              {new Date(video.upload_timestamp).toLocaleString('en-IN')}
+                            </span>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                          <div className="video-row-actions">
+                            <span className={`status-tag-pill ${statusClass}`}>
+                              {video.processing_status}
+                            </span>
+                            <button 
+                              className="video-delete-action-btn"
+                              onClick={(e) => handleDeleteVideo(video.id, e)}
+                              title="Revoke video"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          </article>
+
+          {/* Bottom Card: Critical Alerts */}
+          <article className="live-alerts-card premium-card">
+            <header className="card-header-row">
+              <AlertTriangle size={16} className="text-red animate-pulse" />
+              <h3 className="medium-section-title" style={{ fontSize: '15px' }}>Critical Warnings</h3>
+            </header>
+
+            <div className="alerts-card-body scrollable-y">
+              {alerts.length === 0 ? (
+                <div className="empty-alerts-view">
+                  <Check size={28} className="success-icon" />
+                  <span>No critical distress warnings pending</span>
+                </div>
+              ) : (
+                <div className="alerts-elements-list">
+                  {alerts.map(alert => (
+                    <div key={alert.id} className="alerts-item-card" style={{ borderLeft: '3.5px solid var(--danger)' }}>
+                      <div className="alert-item-details">
+                        <div className="alert-item-header">
+                          <span className="alert-item-id font-mono">{alert.id}</span>
+                          <span className="alert-item-time font-mono">[{alert.time}]</span>
+                        </div>
+                        <span className="alert-item-title font-semibold">{alert.distressType}</span>
+                        <span className="alert-item-location">📍 {alert.location}</span>
+                      </div>
+                      <button 
+                        className="alert-item-acknowledge-btn"
+                        onClick={() => handleAcknowledgeAlert(alert.id)}
+                      >
+                        Acknowledge
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
+
+        </aside>
       </div>
 
-      {/* Row 2: Live Log Feed and Critical Alert Panel */}
-      <div className="live-mon__grid-row live-mon__grid-row--feed-split">
-        {/* Real-time Ticker Feed */}
+      {/* 3. Real-Time Detection Feed */}
+      <section className="live-realtime-feed-row">
         <RealTimeDetectionFeed 
           detections={feedDetections} 
           isMonitoringActive={isMonitoring} 
         />
+      </section>
 
-        {/* Critical Warnings Panel */}
-        <section className="live-mon-alerts-card" aria-labelledby="alerts-title">
-          <header className="live-mon-alerts-card__header">
-            <AlertTriangle size={16} className="text-red" />
-            <h2 id="alerts-title" className="live-mon-alerts-card__title">Critical Alerts</h2>
-          </header>
-          <div className="live-mon-alerts-card__body">
-            {alerts.length === 0 ? (
-              <div className="live-mon-alerts-card__empty">
-                <Check className="live-mon-alerts-card__empty-icon" size={24} />
-                <span>No active critical alerts pending</span>
-              </div>
-            ) : (
-              <div className="live-mon-alerts-list">
-                {alerts.map(alert => (
-                  <div key={alert.id} className="live-mon-alert-box">
-                    <div className="live-mon-alert-box__main">
-                      <div className="live-mon-alert-box__header">
-                        <span className="live-mon-alert-box__id font-mono">{alert.id}</span>
-                        <span className="live-mon-alert-box__time">{alert.time}</span>
-                      </div>
-                      <h3 className="live-mon-alert-box__title">{alert.distressType}</h3>
-                      <p className="live-mon-alert-box__location">{alert.location}</p>
-                    </div>
-                    <button 
-                      className="live-mon-alert-box__ack-btn"
-                      onClick={() => handleAcknowledgeAlert(alert.id)}
-                    >
-                      Acknowledge
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* 4. Detection History Section */}
+      <section className="live-detection-history-card premium-card">
+        <header className="history-section-header">
+          <div className="section-title-group">
+            <History size={18} style={{ color: 'var(--accent-blue)' }} />
+            <h2 className="medium-section-title">Detection History Logs</h2>
           </div>
-        </section>
-      </div>
-
-      {/* Row 3: Full Session Detection History Table */}
-      <section className="live-mon-history-card" aria-labelledby="history-title">
-        <header className="live-mon-history-card__header">
-          <History size={16} className="text-blue" />
-          <h2 id="history-title" className="live-mon-history-card__title">Detection History Logs</h2>
+          <div className="history-search-row">
+            <div className="search-box">
+              <Search size={14} className="search-icon" />
+              <input type="text" placeholder="Search history..." disabled />
+            </div>
+            <select className="severity-filter" disabled>
+              <option>Severity: All</option>
+            </select>
+          </div>
         </header>
-        <div className="live-mon-history-card__body">
-          <div className="live-mon-history-table-wrapper">
-            <table className="live-mon-history-table">
-              <thead>
-                <tr>
-                  <th>Detection ID</th>
-                  <th>Timestamp</th>
-                  <th>Location Landmark</th>
-                  <th>Distress Category</th>
-                  <th>Severity</th>
-                  <th>Confidence</th>
-                  <th>Status</th>
+
+        <div className="history-table-viewport scrollable-x">
+          <table className="history-data-table">
+            <thead>
+              <tr>
+                <th>Detection ID</th>
+                <th>Timestamp</th>
+                <th>Location Landmark</th>
+                <th>Distress Category</th>
+                <th>Severity</th>
+                <th>Confidence</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map(row => (
+                <tr key={row.id} className="table-row-hover">
+                  <td className="font-mono font-bold text-primary-text">{row.id}</td>
+                  <td>{row.time}</td>
+                  <td>{row.location}</td>
+                  <td>{row.distressType}</td>
+                  <td>
+                    <span className={`live-mon-badge live-mon-badge--${row.severity.toLowerCase()}`}>
+                      {row.severity}
+                    </span>
+                  </td>
+                  <td className="font-mono">{row.confidence}%</td>
+                  <td>
+                    <span className={`live-mon-status-badge live-mon-status-badge--${row.status.toLowerCase()}`}>
+                      {row.status}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {history.map(row => (
-                  <tr key={row.id}>
-                    <td className="font-mono font-bold text-slate-100">{row.id}</td>
-                    <td>{row.time}</td>
-                    <td>{row.location}</td>
-                    <td>{row.distressType}</td>
-                    <td>
-                      <span className={`live-mon-badge live-mon-badge--${row.severity.toLowerCase()}`}>
-                        {row.severity}
-                      </span>
-                    </td>
-                    <td className="font-mono">{row.confidence}%</td>
-                    <td>
-                      <span className={`live-mon-status-badge live-mon-status-badge--${row.status.toLowerCase()}`}>
-                        {row.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
+
+      {/* 5. Bottom Analytics KPI row */}
+      <footer className="live-analytics-footer-grid">
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: 'rgba(59,130,246,0.1)' }}>
+              <Activity size={18} style={{ color: '#3B82F6' }} />
+            </div>
+            <span className="kpi-title-label">Total Detections</span>
+          </div>
+          <p className="kpi-value-num">{distressesCount}</p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">distresses flagged</span>
+            <div className="kpi-sparkline">
+              <svg width="60" height="24">
+                <polyline fill="none" stroke="var(--accent-blue)" strokeWidth="1.8" points="0,15 10,20 20,8 30,18 40,12 50,5 60,10" />
+              </svg>
+            </div>
+          </div>
+        </article>
+
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: 'rgba(16,185,129,0.1)' }}>
+              <Cpu size={18} style={{ color: '#10B981' }} />
+            </div>
+            <span className="kpi-title-label">Average Confidence</span>
+          </div>
+          <p className="kpi-value-num">{avgConfidence}%</p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">accuracy rating</span>
+            <div className="kpi-sparkline">
+              <svg width="60" height="24">
+                <polyline fill="none" stroke="var(--success)" strokeWidth="1.8" points="0,20 10,12 20,18 30,10 40,15 50,3 60,6" />
+              </svg>
+            </div>
+          </div>
+        </article>
+
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>
+              <Tv size={18} style={{ color: '#F59E0B' }} />
+            </div>
+            <span className="kpi-title-label">Average FPS</span>
+          </div>
+          <p className="kpi-value-num">{isMonitoring ? '30.0' : '0.0'} FPS</p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">video decode rate</span>
+            <div className="kpi-sparkline">
+              <svg width="60" height="24">
+                <polyline fill="none" stroke="var(--warning)" strokeWidth="1.8" points="0,18 10,15 20,20 30,12 40,8 50,5 60,2" />
+              </svg>
+            </div>
+          </div>
+        </article>
+
+        <article className="premium-kpi-card premium-card">
+          <div className="kpi-header-row">
+            <div className="kpi-icon-container" style={{ backgroundColor: 'rgba(139,92,246,0.1)' }}>
+              <Loader2 size={18} style={{ color: '#8B5CF6' }} className={isMonitoring ? 'animate-spin' : ''} />
+            </div>
+            <span className="kpi-title-label">Processing Time</span>
+          </div>
+          <p className="kpi-value-num">{isMonitoring ? '12.4 ms' : '0.0 ms'}</p>
+          <div className="kpi-card-footer">
+            <span className="comparison-lbl">inference duration</span>
+            <div className="kpi-sparkline">
+              <svg width="60" height="24">
+                <polyline fill="none" stroke="#8B5CF6" strokeWidth="1.8" points="0,5 10,12 20,8 30,15 40,18 50,22 60,20" />
+              </svg>
+            </div>
+          </div>
+        </article>
+      </footer>
+
     </div>
   );
 }
